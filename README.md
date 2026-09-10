@@ -43,6 +43,13 @@ Wiring (from `kicad/nice_pillz_niceview_v9`): the display shares the SPI bus wit
 column driver. SCK = P0.11 (D7), MOSI = P0.24 (D5), display CS = P1.01, powered from the
 nice!nano VCC pin (switched off in deep sleep together with the shift register).
 
+The J9 display header in the KiCad file is ordered CS, GND, 3V3, SCK, MOSI (top to bottom) to
+match the nice!view's own pin order, so a future board can take the display straight on the header.
+Boards made from the original v9 layout have J9 as GND, MOSI, CS, SCK, 3V3 and need the display
+wired pin by pin. Pad numbers and nets are unchanged, so the schematic still matches; only the pad
+positions inside the footprint instance moved (re-importing the footprint from the library would
+undo this).
+
 Config knobs (`boards/shields/nicepillz/nicepillz.conf`):
 - `CONFIG_ZMK_DISPLAY=n` disables the display entirely.
 - `CONFIG_ZMK_DISPLAY_INVERT=y` renders white-on-black instead of black-on-white.
