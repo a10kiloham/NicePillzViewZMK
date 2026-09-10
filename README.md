@@ -7,6 +7,7 @@ The layout is Linux/Gnome driven.
 
 ## Features supported
 - [x] ZMK Studio 
+- [x] nice!view display (horizontal): output/BLE profile, battery % + charging, active layer, WPM
 - [x] Leader key
 - [x] Home row mode
 - [x] caps word
@@ -21,8 +22,38 @@ The layout is Linux/Gnome driven.
 the battery reporting is included so it can be visible in the os. 
 bluetooth power, speed and timeour update too for better experience. 
 
+## Display (nice!view)
+The v9 board carries a nice!view (Sharp 160x68 memory LCD). It is driven in its native
+landscape orientation with ZMK's stock widgets:
+
+```
++----------------------------------------+
+| [USB / BT profile + state]  [⚡ 100%]  |
+|                                        |
+| [active layer]                 WPM  42 |
++----------------------------------------+
+```
+
+- Top left: output status (USB, or BT profile number with connected / disconnected / open state).
+- Top right: battery percentage; a lightning symbol is shown while charging over USB.
+- Bottom left: name of the highest active layer.
+- Bottom right: words per minute.
+
+Wiring (from `kicad/nice_pillz_niceview_v9`): the display shares the SPI bus with the 74HC595
+column driver. SCK = P0.11 (D7), MOSI = P0.24 (D5), display CS = P1.01, powered from the
+nice!nano VCC pin (switched off in deep sleep together with the shift register).
+
+Config knobs (`boards/shields/nicepillz/nicepillz.conf`):
+- `CONFIG_ZMK_DISPLAY=n` disables the display entirely.
+- `CONFIG_ZMK_DISPLAY_INVERT=y` renders white-on-black instead of black-on-white.
+
+The layout lives in `boards/shields/nicepillz/custom_status_screen.c`; the LVGL / nice!view
+defaults are in `Kconfig.defconfig`.
+
 ## LED Behavior
 the power led shows the power status of the Board. the ble led, shows when the board is connected to bluetooth.
+On the v9 board the power LED is driven by the spare 74HC595 output (QA) because P1.01 is used
+as the display chip select; the BLE LED stays on P1.02.
 Sleep modes: 
 sleep (timer 5min): pwr led flashs, ble led off. 
 Deep Sleep (timer 20min): both led off
@@ -30,6 +61,21 @@ Deep Sleep (timer 20min): both led off
 ## Sleep modes
 Sleep, 5 min timer - any keys to resume
 Deep Sleep, 20 min timer - press the esc key (0,0) to wake the board up.
+
+## Building locally
+GitHub Actions builds on every push (`build.yaml`). To build on a machine with Docker:
+
+```
+mkdir -p .zmk/config && cp config/west.yml .zmk/config/west.yml
+docker run --rm --user $(id -u):$(id -g) -e HOME=/tmp -v "$PWD":/workspace -w /workspace/.zmk \
+  zmkfirmware/zmk-build-arm:stable bash -c 'west init -l config && west update'
+docker run --rm --user $(id -u):$(id -g) -e HOME=/tmp -v "$PWD":/workspace -w /workspace/.zmk \
+  zmkfirmware/zmk-build-arm:stable bash -c 'west zephyr-export >/dev/null; \
+  west build -s zmk/app -d build/nicepillz -b nice_nano_v2 -S studio-rpc-usb-uart -- \
+    -DSHIELD=nicepillz -DZMK_CONFIG=/workspace/config -DZMK_EXTRA_MODULES=/workspace -DCONFIG_ZMK_STUDIO=y'
+```
+
+The firmware ends up in `.zmk/build/nicepillz/zephyr/zmk.uf2`.
 
 ## Extra
 

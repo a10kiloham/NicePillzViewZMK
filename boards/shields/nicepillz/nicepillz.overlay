@@ -33,7 +33,11 @@
 	pinctrl-0 = <&nicepillz_spi_default>;
 	pinctrl-1 = <&nicepillz_spi_sleep>;
 	pinctrl-names = "default", "sleep";
-	cs-gpios = <&pro_micro 6 GPIO_ACTIVE_LOW>;
+	/*
+	 * CS 0: 74HC595 latch (RCLK) - column driver + power LED (QA)
+	 * CS 1: nice!view SCS on P1.01 (Sharp memory LCD, active high)
+	 */
+	cs-gpios = <&pro_micro 6 GPIO_ACTIVE_LOW>, <&gpio1 1 GPIO_ACTIVE_HIGH>;
 	shifter: 595@0 {
 		compatible = "zmk,gpio-595";
 		status = "okay";
@@ -43,12 +47,21 @@
     #gpio-cells = <2>;
 		ngpios = <8>;
 	};
+	nice_view: ls0xx@1 {
+		compatible = "sharp,ls0xx";
+		status = "okay";
+		spi-max-frequency = <1000000>;
+		reg = <1>;
+		width = <160>;
+		height = <68>;
+	};
 };
 
 / {
 	chosen {
 		zmk,kscan = &kscan0;
 		zmk,physical-layout = &physical_layout0;
+		zephyr,display = &nice_view;
 	};
 
 	aliases {
@@ -59,9 +72,11 @@
   leds {
     compatible = "gpio-leds";
     status = "okay";
+    /* Power LED: 74HC595 output QA (P1.01 is now the nice!view chip select) */
     led_0: led_0 {
-			gpios = <&gpio1 1 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+			gpios = <&shifter 0 GPIO_ACTIVE_HIGH>;
     };
+    /* BLE LED: P1.02 */
     led_1: led_1 {
 			gpios = <&gpio1 2 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
     };

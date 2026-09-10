@@ -8,5 +8,56 @@ config ZMK_KEYBOARD_NAME
 
 config SPI
     default y
-    
-endif
+
+if ZMK_DISPLAY
+
+# nice!view (Sharp LS0xx 160x68 memory LCD) defaults, mirroring the
+# upstream nice_view shield.
+config LV_Z_VDB_SIZE
+    default 100
+
+config LV_DPI_DEF
+    default 161
+
+config LV_Z_BITS_PER_PIXEL
+    default 1
+
+choice LV_COLOR_DEPTH
+    default LV_COLOR_DEPTH_1
+endchoice
+
+choice ZMK_DISPLAY_WORK_QUEUE
+    default ZMK_DISPLAY_WORK_QUEUE_DEDICATED
+endchoice
+
+choice ZMK_DISPLAY_STATUS_SCREEN
+    default ZMK_DISPLAY_STATUS_SCREEN_CUSTOM
+endchoice
+
+config LV_Z_MEM_POOL_SIZE
+    default 4096
+
+choice LV_FONT_DEFAULT
+    default LV_FONT_DEFAULT_MONTSERRAT_16
+endchoice
+
+# Memory LCDs draw almost nothing, so keep the screen alive while idle.
+config ZMK_DISPLAY_BLANK_ON_IDLE
+    default n
+
+config NICEPILLZ_STATUS_SCREEN
+    bool "Horizontal nice!view status screen (output, battery, layer, WPM)"
+    default y if ZMK_DISPLAY_STATUS_SCREEN_CUSTOM
+    select LV_USE_LABEL
+    select LV_USE_THEME_MONO
+    select LV_FONT_MONTSERRAT_16
+    select LV_FONT_MONTSERRAT_12
+    select ZMK_WIDGET_OUTPUT_STATUS
+    select ZMK_WIDGET_LAYER_STATUS
+    select ZMK_WIDGET_BATTERY_STATUS
+    select ZMK_WIDGET_BATTERY_STATUS_SHOW_PERCENTAGE
+    select ZMK_WIDGET_WPM_STATUS
+
+endif # ZMK_DISPLAY
+
+endif # SHIELD_NICEPILLZ

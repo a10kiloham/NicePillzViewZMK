@@ -1,25 +1,89 @@
+/*
+ * Status LEDs for the Nice Pillz.
+ *
+ *   led_0 / led-caps : power LED, driven by the 74HC595 output QA
+ *   led_1 / led-num  : BLE LED, driven directly by P1.02
+ *
+ * The 74HC595 is reached over SPI, and its GPIO driver refuses to run from
+ * interrupt context (it returns -EWOULDBLOCK). All LED writes are therefore
+ * funnelled through a single work item on the system work queue; the idle
+ * blink timer only flips a phase flag and queues that work.
+ *
+ * Behavior:
+ *   active : power LED on, BLE LED mirrors the active profile connection
+ *   idle   : power LED slow blink (1s on / 2s off), BLE LED off
+ *   sleep  : both off
+ */
+
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
 #include <zephyr/drivers/led.h>
 #include <zephyr/kernel.h>
 #include <zephyr/init.h>
+#include <zephyr/logging/log.h>
+
 #include <zmk/ble.h>
 #include <zmk/activity.h>
+#include <zmk/event_manager.h>
 #include <zmk/events/ble_active_profile_changed.h>
 #include <zmk/events/activity_state_changed.h>
 
+LOG_MODULE_REGISTER(nicepillz_leds, CONFIG_ZMK_LOG_LEVEL);
+
 #define LED_GPIO_NODE_ID DT_COMPAT_GET_ANY_STATUS_OKAY(gpio_leds)
 
-#define LED_CAPS DT_NODE_CHILD_IDX(DT_ALIAS(led_caps))
-#define LED_NUM  DT_NODE_CHILD_IDX(DT_ALIAS(led_num))
+#define LED_PWR DT_NODE_CHILD_IDX(DT_ALIAS(led_caps))
+#define LED_BLE DT_NODE_CHILD_IDX(DT_ALIAS(led_num))
 
 /* Idle blink timing */
-#define IDLE_BLINK_ON_MS   1000
-#define IDLE_BLINK_OFF_MS  2000
+#define IDLE_BLINK_ON_MS 1000
+#define IDLE_BLINK_OFF_MS 2000
 
 static const struct device *led_dev = DEVICE_DT_GET(LED_GPIO_NODE_ID);
-static bool idle_blink_state = false;
-static bool is_idle = false;
+
+static enum zmk_activity_state activity = ZMK_ACTIVITY_ACTIVE;
+static bool blink_phase_on;
+
+static void set_led(uint32_t led, bool on) {
+    int ret = on ? led_on(led_dev, led) : led_off(led_dev, led);
+    if (ret < 0) {
+        LOG_WRN("Failed to set LED %u: %d", led, ret);
+    }
+}
+
+/* --- Apply the LED state for the current activity/BLE state --- */
+
+static void led_update_handler(struct k_work *work) {
+    switch (activity) {
+    case ZMK_ACTIVITY_ACTIVE:
+        set_led(LED_PWR, true);
+        set_led(LED_BLE, zmk_ble_active_profile_is_connected());
+        break;
+    case ZMK_ACTIVITY_IDLE:
+        set_led(LED_PWR, blink_phase_on);
+        set_led(LED_BLE, false);
+        break;
+    case ZMK_ACTIVITY_SLEEP:
+        set_led(LED_PWR, false);
+        set_led(LED_BLE, false);
+        break;
+    }
+}
+
+K_WORK_DEFINE(led_update_work, led_update_handler);
+
+/*
+ * Apply immediately when called from a thread (ZMK raises its events from
+ * thread context, and on the way to deep sleep there may be no chance for
+ * deferred work to run), otherwise defer to the system work queue.
+ */
+static void led_request_update(void) {
+    if (k_is_in_isr()) {
+        k_work_submit(&led_update_work);
+    } else {
+        led_update_handler(NULL);
+    }
+}
 
 /* --- Idle slow blink timer --- */
 
@@ -27,63 +91,26 @@ static void idle_blink_handler(struct k_timer *timer);
 K_TIMER_DEFINE(idle_blink_timer, idle_blink_handler, NULL);
 
 static void idle_blink_handler(struct k_timer *timer) {
-    idle_blink_state = !idle_blink_state;
-    if (idle_blink_state) {
-        led_on(led_dev, LED_CAPS);
-        k_timer_start(&idle_blink_timer, K_MSEC(IDLE_BLINK_ON_MS), K_NO_WAIT);
-    } else {
-        led_off(led_dev, LED_CAPS);
-        k_timer_start(&idle_blink_timer, K_MSEC(IDLE_BLINK_OFF_MS), K_NO_WAIT);
-    }
-}
-
-static void idle_blink_start(void) {
-    is_idle = true;
-    /* Turn off BLE LED during idle to save power */
-    led_off(led_dev, LED_NUM);
-    /* Start blink cycle: LED on first */
-    idle_blink_state = true;
-    led_on(led_dev, LED_CAPS);
-    k_timer_start(&idle_blink_timer, K_MSEC(IDLE_BLINK_ON_MS), K_NO_WAIT);
-}
-
-static void idle_blink_stop(void) {
-    is_idle = false;
-    k_timer_stop(&idle_blink_timer);
-}
-
-/* --- Restore LEDs on wake --- */
-
-static void leds_restore_active(void) {
-    idle_blink_stop();
-    /* Power LED back on */
-    led_on(led_dev, LED_CAPS);
-    /* Restore BLE LED state */
-    if (zmk_ble_active_profile_is_connected()) {
-        led_on(led_dev, LED_NUM);
-    } else {
-        led_off(led_dev, LED_NUM);
-    }
+    blink_phase_on = !blink_phase_on;
+    k_timer_start(&idle_blink_timer,
+                  K_MSEC(blink_phase_on ? IDLE_BLINK_ON_MS : IDLE_BLINK_OFF_MS), K_NO_WAIT);
+    /* Timer callbacks run in ISR context: never touch the SPI-attached LED here. */
+    k_work_submit(&led_update_work);
 }
 
 /* --- Activity state listener --- */
 
 static int activity_listener_cb(const zmk_event_t *eh) {
-    enum zmk_activity_state state = zmk_activity_get_state();
+    activity = zmk_activity_get_state();
 
-    switch (state) {
-    case ZMK_ACTIVITY_ACTIVE:
-        leds_restore_active();
-        break;
-    case ZMK_ACTIVITY_IDLE:
-        idle_blink_start();
-        break;
-    case ZMK_ACTIVITY_SLEEP:
-        idle_blink_stop();
-        led_off(led_dev, LED_CAPS);
-        led_off(led_dev, LED_NUM);
-        break;
+    if (activity == ZMK_ACTIVITY_IDLE) {
+        blink_phase_on = true;
+        k_timer_start(&idle_blink_timer, K_MSEC(IDLE_BLINK_ON_MS), K_NO_WAIT);
+    } else {
+        k_timer_stop(&idle_blink_timer);
     }
+
+    led_request_update();
     return 0;
 }
 
@@ -93,15 +120,8 @@ ZMK_SUBSCRIPTION(activity_led_listener, zmk_activity_state_changed);
 /* --- BLE connection listener --- */
 
 static int ble_listener_cb(const zmk_event_t *eh) {
-    /* Only update BLE LED when not in idle/sleep */
-    if (is_idle) {
-        return 0;
-    }
-    if (zmk_ble_active_profile_is_connected()) {
-        led_on(led_dev, LED_NUM);
-    } else {
-        led_off(led_dev, LED_NUM);
-    }
+    /* The handler only mirrors the BLE state while active. */
+    led_request_update();
     return 0;
 }
 
@@ -110,18 +130,14 @@ ZMK_SUBSCRIPTION(ble_led_listener, zmk_ble_active_profile_changed);
 
 /* --- Init --- */
 
-static int leds_init(const struct device *device) {
+static int leds_init(void) {
     if (!device_is_ready(led_dev)) {
+        LOG_ERR("LED device not ready");
         return -ENODEV;
     }
 
-    /* Power ON - always on */
-    led_on(led_dev, LED_CAPS);
-
-    /* Set initial BLE state */
-    if (zmk_ble_active_profile_is_connected()) {
-        led_on(led_dev, LED_NUM);
-    }
+    activity = zmk_activity_get_state();
+    led_request_update();
 
     return 0;
 }
