@@ -48,7 +48,7 @@ rotated into the panel, top to bottom:
 5. **Lock indicators** - *Caps Lock*, *Num Lock*, *Scrl Lock* boxes at the bottom, stacked; they
    use the host's HID lock state.
 
-Options (`boards/shields/nicepillz/Kconfig.defconfig`, override in `nicepillz.conf`):
+Options (`boards/shields/nicepillz/Kconfig.defconfig`, override in `boards/shields/nicepillz/nicepillz.conf`):
 - `CONFIG_ZMK_DISPLAY=n` disables the display entirely.
 - `CONFIG_NICEPILLZ_DISPLAY_INVERTED=y` draws white on black.
 
