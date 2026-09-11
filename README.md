@@ -51,7 +51,7 @@ Options (`Kconfig.defconfig`, override in `nicepillz.conf`):
 `tools/preview/build.sh` compiles the real drawing code against LVGL on the host and writes
 `docs/display-preview.png`, so layout changes can be checked without flashing.
 
-Wiring (from `kicad/nice_pillz_niceview_v9`): the display shares the SPI bus with the 74HC595
+Wiring (from `kicad/nice_pillz_niceview_v10`): the display shares the SPI bus with the 74HC595
 column driver. SCK = P0.11 (D7), MOSI = P0.24 (D5), display CS = P1.01, powered from the
 nice!nano VCC pin (switched off in deep sleep together with the shift register).
 
@@ -75,10 +75,10 @@ Sleep, 5 min timer - any keys to resume
 Deep Sleep, 20 min timer - press the esc key (0,0) to wake the board up.
 
 ## PCB / ordering from JLCPCB
-`kicad/nice_pillz_niceview_v9.kicad_pcb` is the board (KiCad 10). Ready-to-upload fabrication
+`kicad/nice_pillz_niceview_v10.kicad_pcb` is the board (KiCad 10). Ready-to-upload fabrication
 files are in `kicad/jlcpcb/`:
 
-- `nice_pillz_niceview_v9_jlcpcb.zip` - upload this as-is to JLCPCB (2 layers, 1.6 mm).
+- `nice_pillz_niceview_v10_jlcpcb.zip` - upload this as-is to JLCPCB (2 layers, 1.6 mm).
 - `gerbers/` - the same files unzipped: copper, mask, paste, silkscreen, board outline (Protel
   extensions), Excellon drills split into PTH / NPTH, and a drill map.
 
@@ -89,14 +89,24 @@ warnings). Regenerate after any layout change:
 ```
 kicad-cli pcb export gerbers --output kicad/jlcpcb/gerbers/ \
   --layers "F.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts" \
-  --subtract-soldermask --no-x2 --no-netlist --disable-aperture-macros kicad/nice_pillz_niceview_v9.kicad_pcb
+  --subtract-soldermask --no-x2 --no-netlist --disable-aperture-macros kicad/nice_pillz_niceview_v10.kicad_pcb
 kicad-cli pcb export drill --output kicad/jlcpcb/gerbers/ --format excellon --excellon-units mm \
   --excellon-zeros-format decimal --excellon-separate-th --drill-origin absolute \
-  --generate-map --map-format gerberx2 kicad/nice_pillz_niceview_v9.kicad_pcb
-cd kicad/jlcpcb/gerbers && zip ../nice_pillz_niceview_v9_jlcpcb.zip *
+  --generate-map --map-format gerberx2 kicad/nice_pillz_niceview_v10.kicad_pcb
+cd kicad/jlcpcb/gerbers && zip ../nice_pillz_niceview_v10_jlcpcb.zip *
 ```
 
-Note the J9 display header on this revision is ordered CS, GND, 3V3, SCK, MOSI (see Display above).
+Changes in v10 (silkscreen v1.1) compared with the v9 boards already made:
+
+- **J9 display header** is ordered CS, GND, 3V3, SCK, MOSI to match the nice!view (see Display above).
+- **Switch LED header** replaces the external reset terminal at the top of the board (same two holes).
+  It is a 2-pin 2.54 mm header for the LED inside an illuminated power switch: the square pin (marked
+  `+`) is the LED anode, fed from the switched 3.3 V rail through **R3** next to it; the round pin is
+  GND. Fit R3 to suit the LED: 330 R for red/green/yellow (about 4 mA), 100 R for blue/white. The
+  LED is on whenever the keyboard is powered: off when the power switch is off, off in deep sleep
+  (the firmware cuts the 3.3 V rail), and on while charging over USB even with the switch off. The
+  onboard reset push button is unchanged; there is no longer a terminal for an external reset.
+- D1/D2 are labelled LED_PWR / LED_BLE on the fab layer.
 
 ## Building locally
 GitHub Actions builds on every push (`build.yaml`). To build on a machine with Docker:
