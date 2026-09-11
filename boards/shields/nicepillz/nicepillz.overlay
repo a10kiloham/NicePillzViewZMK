@@ -57,13 +57,6 @@
 	};
 };
 
-/* Second USB CDC ACM port: the host writes the current time to it (time_sync.c) */
-&zephyr_udc0 {
-	cdc_acm_uart_time: cdc_acm_uart_time {
-		compatible = "zephyr,cdc-acm-uart";
-	};
-};
-
 / {
 	chosen {
 		zmk,kscan = &kscan0;

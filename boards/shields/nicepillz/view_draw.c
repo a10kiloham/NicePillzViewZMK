@@ -8,22 +8,20 @@
 #include <string.h>
 
 /* ---- vertical layout (upright coordinates, y grows downwards) ---- */
-#define TIME_Y 0
-#define SEP1_Y 27
-#define BAT_ICON_Y 31
-#define BAT_TEXT_Y 45
-#define SEP2_Y 61
-#define WPM_Y 63
+#define BAT_ICON_Y 14
+#define BAT_TEXT_Y 36
+#define SEP2_Y 58
+#define WPM_Y 62
 #define SEP3_Y 90
 #define BT_Y 93
 #define DOTS_Y 117
 #define LOCKS_BOTTOM NPV_H
 
-#define BAT_ICON_X 14
-#define BAT_ICON_W 34
-#define BAT_ICON_H 12
-#define BAT_NUB_W 3
-#define BAT_NUB_H 6
+#define BAT_ICON_X 10
+#define BAT_ICON_W 42
+#define BAT_ICON_H 18
+#define BAT_NUB_W 4
+#define BAT_NUB_H 8
 
 #define DOT_R 6
 #define DOT_PITCH 13
@@ -67,25 +65,12 @@ static void hline(lv_obj_t *c, lv_coord_t y, lv_coord_t x1, lv_coord_t x2) {
     lv_canvas_draw_line(c, p, 2, &d);
 }
 
-static void draw_time(lv_obj_t *c, const struct npv_state *st) {
-    char buf[8];
-    if (!st->time_valid) {
-        strcpy(buf, "--:--");
-    } else if (st->clock_12h) {
-        uint8_t h = st->hour % 12;
-        snprintf(buf, sizeof(buf), "%u:%02u", h == 0 ? 12 : h, st->minute);
-    } else {
-        snprintf(buf, sizeof(buf), "%02u:%02u", st->hour, st->minute);
-    }
-    text(c, &lv_font_montserrat_22, 0, TIME_Y, NPV_W, LV_TEXT_ALIGN_CENTER, fg, buf);
-}
-
 static void draw_battery(lv_obj_t *c, const struct npv_state *st) {
     char buf[16];
 
     if (st->charging) {
         /* lightning bolt replaces the gauge */
-        text(c, &lv_font_montserrat_12, 0, BAT_ICON_Y - 1, NPV_W, LV_TEXT_ALIGN_CENTER, fg,
+        text(c, &lv_font_montserrat_12, 0, BAT_ICON_Y + 2, NPV_W, LV_TEXT_ALIGN_CENTER, fg,
              LV_SYMBOL_CHARGE " Charging");
     } else {
         /* battery outline, nub and fill */
@@ -173,8 +158,6 @@ void npv_draw(lv_obj_t *c, const struct npv_state *st) {
 
     lv_canvas_fill_bg(c, bg, LV_OPA_COVER);
 
-    draw_time(c, st);
-    hline(c, SEP1_Y, 6, NPV_W - 7);
     draw_battery(c, st);
     hline(c, SEP2_Y, 6, NPV_W - 7);
     draw_wpm(c, st);

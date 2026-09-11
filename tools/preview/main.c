@@ -41,17 +41,17 @@ int main(void) {
     lv_canvas_set_buffer(canvas, upright_buf, NPV_W, NPV_H, LV_IMG_CF_TRUE_COLOR);
 
     struct scene scenes[] = {
-        {"typical",  {.time_valid = true, .hour = 14, .minute = 7, .battery = 82, .wpm = 63,
+        {"typical",  {.battery = 82, .wpm = 63,
                       .transport = NPV_TRANSPORT_BLE, .ble_profile = 0, .ble_connected = true, .layer = 0}},
-        {"charging", {.time_valid = true, .hour = 9, .minute = 30, .battery = 57, .charging = true, .wpm = 0,
+        {"charging", {.battery = 57, .charging = true, .wpm = 0,
                       .transport = NPV_TRANSPORT_USB, .layer = 1, .caps_lock = true}},
-        {"locks",    {.time_valid = true, .hour = 23, .minute = 59, .battery = 15, .wpm = 120,
+        {"locks",    {.battery = 15, .wpm = 120,
                       .transport = NPV_TRANSPORT_BLE, .ble_profile = 2, .ble_connected = false, .layer = 4,
                       .caps_lock = true, .num_lock = true, .scroll_lock = true}},
-        {"unsynced", {.time_valid = false, .battery = 100, .wpm = 41,
+        {"unsynced", {.battery = 100, .wpm = 41,
                       .transport = NPV_TRANSPORT_BLE, .ble_profile = 1, .ble_open = true, .layer = 2,
                       .num_lock = true, .scroll_lock = true}},
-        {"inverted", {.time_valid = true, .hour = 18, .minute = 45, .battery = 64, .wpm = 88,
+        {"inverted", {.battery = 64, .wpm = 88,
                       .transport = NPV_TRANSPORT_BLE, .ble_profile = 0, .ble_connected = true, .layer = 3,
                       .inverted = true, .caps_lock = true}},
     };

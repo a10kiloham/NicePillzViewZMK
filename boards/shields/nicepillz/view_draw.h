@@ -24,11 +24,6 @@
 enum npv_transport { NPV_TRANSPORT_USB, NPV_TRANSPORT_BLE };
 
 struct npv_state {
-    bool time_valid;
-    uint8_t hour;   /* 0-23 */
-    uint8_t minute; /* 0-59 */
-    bool clock_12h;
-
     uint8_t battery; /* percent */
     bool charging;   /* USB power present */
 

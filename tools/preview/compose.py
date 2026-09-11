@@ -7,7 +7,7 @@ BUILD = os.path.join(HERE, "build")
 OUT = os.path.join(HERE, "..", "..", "docs", "display-preview.png")
 SCALE = 3
 SCENES = [("typical", "On battery, BT profile 1"), ("charging", "USB, charging, Caps"),
-          ("locks", "Layer 5, all locks, BT off"), ("unsynced", "Clock not set, BT open"),
+          ("locks", "Layer 5, all locks, BT off"), ("unsynced", "Full battery, BT open"),
           ("inverted", "Inverted option")]
 BEZEL = 14
 GAP = 24

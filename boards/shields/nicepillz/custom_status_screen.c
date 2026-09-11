@@ -3,7 +3,6 @@
  *
  * Portrait layout, header pins at the bottom:
  *
- *      12:34            current time (set over USB, see time_sync.c)
  *      [=====]  87%     battery gauge + percent, or "Charging" when on USB
  *        63             words per minute (refreshed at most every 5 s)
  *      (BT) 1 ok        output: bluetooth logo + profile, or a USB symbol
@@ -37,9 +36,6 @@
 #include <zmk/wpm.h>
 
 #include "view_draw.h"
-#if IS_ENABLED(CONFIG_NICEPILLZ_TIME_SYNC)
-#include "time_sync.h"
-#endif
 
 /* HID boot keyboard output report bits */
 #define HID_LED_NUM_LOCK BIT(0)
@@ -73,20 +69,6 @@ static void capture_zmk_state(struct npv_state *s) {
     s->scroll_lock = ind & HID_LED_SCROLL_LOCK;
 
     s->inverted = IS_ENABLED(CONFIG_NICEPILLZ_DISPLAY_INVERTED);
-    s->clock_12h = IS_ENABLED(CONFIG_NICEPILLZ_TIME_12H);
-}
-
-static bool capture_time(struct npv_state *s) {
-    uint8_t h = 0, m = 0;
-    bool valid = false;
-#if IS_ENABLED(CONFIG_NICEPILLZ_TIME_SYNC)
-    valid = npv_time_now(&h, &m);
-#endif
-    bool changed = (valid != s->time_valid) || (h != s->hour) || (m != s->minute);
-    s->time_valid = valid;
-    s->hour = h;
-    s->minute = m;
-    return changed;
 }
 
 /* Runs on the display work queue. */
@@ -120,13 +102,12 @@ ZMK_SUBSCRIPTION(npv_listener, zmk_endpoint_changed);
 ZMK_SUBSCRIPTION(npv_listener, zmk_layer_state_changed);
 ZMK_SUBSCRIPTION(npv_listener, zmk_hid_indicators_changed);
 
-/* Once a second on the display queue: clock minute and throttled WPM. */
+/* Once a second on the display queue: throttled WPM refresh. */
 static void tick_handler(struct k_work *work) {
-    bool changed;
+    bool changed = false;
     int64_t now = k_uptime_get();
 
     k_mutex_lock(&state_lock, K_FOREVER);
-    changed = capture_time(&state);
     int wpm = zmk_wpm_get_state();
     if (wpm != state.wpm && (now - last_wpm_update) >= CONFIG_NICEPILLZ_WPM_INTERVAL_MS) {
         state.wpm = wpm;
@@ -162,7 +143,6 @@ lv_obj_t *zmk_display_status_screen(void) {
 
     k_mutex_lock(&state_lock, K_FOREVER);
     capture_zmk_state(&state);
-    capture_time(&state);
     state.wpm = zmk_wpm_get_state();
     k_mutex_unlock(&state_lock);
     last_wpm_update = k_uptime_get();

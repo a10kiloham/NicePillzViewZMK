@@ -68,21 +68,9 @@ if NICEPILLZ_STATUS_SCREEN
 config NICEPILLZ_DISPLAY_INVERTED
     bool "Draw white on black instead of black on white"
 
-config NICEPILLZ_TIME_12H
-    bool "Show the clock as 12-hour instead of 24-hour"
-
 config NICEPILLZ_WPM_INTERVAL_MS
     int "Minimum time between WPM updates on the display (ms)"
     default 5000
-
-config NICEPILLZ_TIME_SYNC
-    bool "USB serial port for setting the clock from the host"
-    default y
-    depends on ZMK_USB
-    select USB_DEVICE_STACK
-    select USB_CDC_ACM
-    select SERIAL
-    select UART_INTERRUPT_DRIVEN
 
 endif # NICEPILLZ_STATUS_SCREEN
 
