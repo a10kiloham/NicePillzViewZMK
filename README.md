@@ -1,35 +1,40 @@
-# Nice Pillz ZMK Config
+# Nice Pillz View - ZMK config and PCB
 
 ## Overview
-ZMK Configurations for the the NicePillz Board: https://github.com/nol00p/NicePillz
+ZMK configuration and PCB for the Nice Pillz board, a nice!nano based controller for the Kinesis
+Advantage, extended with a nice!view display. Based on https://github.com/nol00p/NicePillz.
 The layout is Linux/Gnome driven.
 
 ## Hardware
-- The PCB is updated for this header, see below.
+- The PCB in `kicad/` is updated for the display header and the switch LED, see [PCB](#pcb--ordering-from-jlcpcb) below.
 - For the original design and the thumb pads, see https://github.com/nol00p/NicePillz
-- For the rubber function buttons replacement with PCB for the older Advantage 1, these are excellent https://github.com/bluelightning32/kinesis-fn
+- For the rubber function buttons replacement with PCB for the older Advantage 1, these are excellent: https://github.com/bluelightning32/kinesis-fn
+- `housing_stl/niceview_cover.stl` is a printable cover that holds the nice!view in the Kinesis top shell.
+
+<p>
+<img src="docs/kinesis-display-1.jpg" width="300" alt="nice!view cover fitted in the Kinesis Advantage shell">
+<img src="docs/kinesis-display-2.jpg" width="400" alt="nice!view cover, second view">
+</p>
 
 ## Features supported
-- [x] ZMK Studio 
+- [x] ZMK Studio
 - [x] nice!view display (vertical): battery/charging, WPM, BT profile, layer, lock indicators
 - [x] Leader key
-- [x] Home row mode
-- [x] caps word
-- [x] Helper.h
-- [x] Tri State Layer
-- [x] Macro
-	- [x] with unicode support. 
-###### Supported but not yet tested
-- [ ] Combo
+- [x] Home row mods
+- [x] Caps word
+- [x] zmk-helpers
+- [x] Tri-state layer
+- [x] Macros, with unicode support
+- [ ] Combos (supported but not yet tested)
 
-## Battery level Tweaks
-the battery reporting is included so it can be visible in the os. 
-bluetooth and power status update too for better experience. 
+## Battery level
+Battery reporting is enabled so the level is visible in the OS. Bluetooth and power status update
+too for a better experience.
 
 ## Display (nice!view)
-The v9 board carries a nice!view (Sharp 160x68 memory LCD), mounted vertically with the header
-pins at the bottom. The status screen (`boards/shields/nicepillz/view_draw.c`) is drawn upright
-and rotated into the panel, top to bottom:
+The board carries a nice!view (Sharp 160x68 memory LCD), mounted vertically with the header pins
+at the bottom. The status screen (`boards/shields/nicepillz/view_draw.c`) is drawn upright and
+rotated into the panel, top to bottom:
 
 ![display preview](docs/display-preview.png)
 
@@ -41,64 +46,44 @@ and rotated into the panel, top to bottom:
    (bonded but not connected); a USB symbol when USB is the selected output.
 4. **Layer** - five numbered dots; the filled one is the highest active layer (1-5).
 5. **Lock indicators** - *Caps Lock*, *Num Lock*, *Scrl Lock* boxes at the bottom, stacked; they
-   use the host's HID lock state, replacing the old LEDs.
+   use the host's HID lock state.
 
-Options (`Kconfig.defconfig`, override in `nicepillz.conf`):
+Options (`boards/shields/nicepillz/Kconfig.defconfig`, override in `nicepillz.conf`):
 - `CONFIG_ZMK_DISPLAY=n` disables the display entirely.
 - `CONFIG_NICEPILLZ_DISPLAY_INVERTED=y` draws white on black.
 
-### Preview renders
 `tools/preview/build.sh` compiles the real drawing code against LVGL on the host and writes
 `docs/display-preview.png`, so layout changes can be checked without flashing.
 
-Wiring (from `kicad/nice_pillz_niceview_v10`): the display shares the SPI bus with the 74HC595
-column driver. SCK = P0.11 (D7), MOSI = P0.24 (D5), display CS = P1.01, powered from the
-nice!nano VCC pin (switched off in deep sleep together with the shift register).
+Wiring: the display shares the SPI bus with the 74HC595 column driver. SCK = P0.11 (D7),
+MOSI = P0.24 (D5), display CS = P1.01, powered from the nice!nano VCC pin (switched off in deep
+sleep together with the shift register). On v10 boards the J9 header is in the nice!view's own pin
+order (CS, GND, 3V3, SCK, MOSI, top to bottom) so the display plugs straight in. v9 boards have J9
+as GND, MOSI, CS, SCK, 3V3 and need the display wired pin by pin.
 
-The J9 display header in the KiCad file is ordered CS, GND, 3V3, SCK, MOSI (top to bottom) to
-match the nice!view's own pin order, so a future board can take the display straight on the header.
-Boards made from the original v9 layout have J9 as GND, MOSI, CS, SCK, 3V3 and need the display
-wired pin by pin. Pad numbers and nets are unchanged, so the schematic still matches; only the pad
-positions inside the footprint instance moved (re-importing the footprint from the library would
-undo this).
+## LEDs and sleep
+- **PWR** (D1): on while the board is awake, driven by the spare 74HC595 output (P1.01 is the
+  display chip select). Slow flash after 5 min idle, off in deep sleep.
+- **BLE** (D2): on while the active Bluetooth profile is connected, off when idle or asleep.
+- **Switch LED** header (v10): powers the LED inside an illuminated power switch whenever the board
+  has power, see [PCB](#pcb--ordering-from-jlcpcb).
 
-## LED Behavior
-the power led shows the power status of the Board. the ble led, shows when the board is connected to bluetooth.
-On the v9 board the power LED is driven by the spare 74HC595 output (QA) because P1.01 is used
-as the display chip select; the BLE LED stays on P1.02.
-Sleep modes: 
-sleep (timer 5min): pwr led flashs, ble led off. 
-Deep Sleep (timer 20min): both led off
-
-## Sleep modes
-Sleep, 5 min timer - any keys to resume
-Deep Sleep, 20 min timer - press the esc key (0,0) to wake the board up.
+Sleep after 5 min idle: any key resumes. Deep sleep after 20 min: press the Esc key (0,0) to wake.
 
 ## PCB / ordering from JLCPCB
 `kicad/nice_pillz_niceview_v10.kicad_pcb` is the board (KiCad 10). Ready-to-upload fabrication
-files are in `kicad/jlcpcb/`:
+files, exported with `kicad-cli` from the committed board (DRC: 0 unconnected items), are in
+`kicad/jlcpcb/` and attached to the [v10 release](https://github.com/a10kiloham/NicePillzViewZMK/releases/tag/v10):
 
 - `nice_pillz_niceview_v10_jlcpcb.zip` - upload this as-is to JLCPCB (2 layers, 1.6 mm).
 - `gerbers/` - the same files unzipped: copper, mask, paste, silkscreen, board outline (Protel
   extensions), Excellon drills split into PTH / NPTH, and a drill map.
 
-They were generated with `kicad-cli` from the board as committed (zones refilled, DRC run:
-0 unconnected items; the remaining DRC items are pre-existing courtyard/silkscreen/library
-warnings). Regenerate after any layout change:
-
-```
-kicad-cli pcb export gerbers --output kicad/jlcpcb/gerbers/ \
-  --layers "F.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts" \
-  --subtract-soldermask --no-x2 --no-netlist --disable-aperture-macros kicad/nice_pillz_niceview_v10.kicad_pcb
-kicad-cli pcb export drill --output kicad/jlcpcb/gerbers/ --format excellon --excellon-units mm \
-  --excellon-zeros-format decimal --excellon-separate-th --drill-origin absolute \
-  --generate-map --map-format gerberx2 kicad/nice_pillz_niceview_v10.kicad_pcb
-cd kicad/jlcpcb/gerbers && zip ../nice_pillz_niceview_v10_jlcpcb.zip *
-```
-
 Changes in v10 (silkscreen v1.1) compared with the v9 boards already made:
 
 - **J9 display header** is ordered CS, GND, 3V3, SCK, MOSI to match the nice!view (see Display above).
+  Pad numbers and nets are unchanged, so the schematic still matches; only the pad positions inside
+  the footprint instance moved (re-importing the footprint from the library would undo this).
 - **Switch LED header** replaces the external reset terminal at the top of the board (same two holes).
   It is a 2-pin 2.54 mm header for the LED inside an illuminated power switch: the square pin (marked
   `+`) is the LED anode, fed from the switched 3.3 V rail through **R3** next to it; the round pin is
@@ -108,76 +93,42 @@ Changes in v10 (silkscreen v1.1) compared with the v9 boards already made:
   onboard reset push button is unchanged; there is no longer a terminal for an external reset.
 - D1/D2 are labelled LED_PWR / LED_BLE on the fab layer.
 
-## Building locally
-GitHub Actions builds on every push (`build.yaml`). To build on a machine with Docker:
+## Hardware bill of materials
+Mostly common parts and a bit of soldering.
 
-```
-mkdir -p .zmk/config && cp config/west.yml .zmk/config/west.yml
-docker run --rm --user $(id -u):$(id -g) -e HOME=/tmp -v "$PWD":/workspace -w /workspace/.zmk \
-  zmkfirmware/zmk-build-arm:stable bash -c 'west init -l config && west update'
-docker run --rm --user $(id -u):$(id -g) -e HOME=/tmp -v "$PWD":/workspace -w /workspace/.zmk \
-  zmkfirmware/zmk-build-arm:stable bash -c 'west zephyr-export >/dev/null; \
-  west build -s zmk/app -d build/nicepillz -b nice_nano_v2 -S studio-rpc-usb-uart -- \
-    -DSHIELD=nicepillz -DZMK_CONFIG=/workspace/config -DZMK_EXTRA_MODULES=/workspace -DCONFIG_ZMK_STUDIO=y'
-```
+| Position          | Part                                   | Qty | Notes |
+| ----------------- | -------------------------------------- | --- | ----- |
+| J1-J4, J7, J8     | Molex 39-53-2135, 13-way               | 6   | [Mouser](https://eu.mouser.com/ProductDetail/Molex/39-53-2135?qs=cm0cgiBciNYI3jeMaEn0Ng%3D%3D) |
+| J5, J6            | 1x10 pin header, 2.54 mm               | 2   | |
+| J9                | nice!view                              | 1   | v10: plugs onto the header; v9: wire pin by pin |
+|                   | JST-EH 5-pin connector                 | 2   | display lead |
+| U1                | nice!nano v2                           | 1   | |
+| U2                | 74HC595                                | 1   | [Amazon](https://www.amazon.fr/dp/B093Y2MQGV) |
+| U2                | 16-pin DIP socket                      | 1   | [Amazon](https://www.amazon.fr/dp/B07ZCRTRXK) |
+| D1, D2            | LED (PWR, BLE)                         | 2   | [Amazon](https://www.amazon.fr/dp/B005Q2MZ4Q) |
+| R1, R2            | 4.7 k resistor                         | 2   | sets LED brightness, smaller = brighter (1 k is clearly visible at 3.3 V) |
+| R3                | 330 R (red/green/yellow) or 100 R (blue/white) | 1 | v10 only, switch LED series resistor |
+| Battery, Ext. PWR Switch | 2-pin screw terminal, 2.54 mm   | 2   | v9 boards have a third one for an external reset |
+| Switch LED        | 1x2 pin header, 2.54 mm                | 1   | v10 only |
+|                   | 6 mm tactile reset button              | 1   | |
+|                   | Illuminated power switch               | 1   | Adafruit; LED leads go to the Switch LED header on v10 |
+|                   | 3.7 V LiPo battery, 2000 mAh           | 1   | [Amazon](https://www.amazon.fr/dp/B08214DJLJ) |
+|                   | USB-C panel mount extension            | 1   | [AliExpress](https://fr.aliexpress.com/item/1005009401577622.html) |
+|                   | Display cover, 3D printed              | 1   | `housing_stl/niceview_cover.stl` |
 
-The firmware ends up in `.zmk/build/nicepillz/zephyr/zmk.uf2`.
+## Assembly
+A small hot plate (Miniware MHP30 or a cheaper clone) makes the SMD parts much easier.
+LED orientation: with the LEDs facing up, the arrow points to the left across the two pads.
 
-## Extra
-
-A quick shell script to get the battere state of the keyboard on the CLI.
-
-```
-!/bin/bash
-# Compact colored battery display
-
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-if [ $# -ne 1 ]; then
-  echo "Usage: $0 MAC_ADDRESS"
-  exit 1
-fi
-
-battery=$(bluetoothctl info "$1" | awk -F'[()]' '/Battery Percentage/ {print $2}')
-
-if [ -z "$battery" ]; then
-  echo -e "${RED}✗ No battery info${NC}"
-  exit 1
-fi
-
-# Choose color based on battery level
-if [ "$battery" -ge 70 ]; then
-  color=$GREEN
-  icon="🔋"
-elif [ "$battery" -ge 30 ]; then
-  color=$YELLOW
-  icon="🔋"
-else
-  color=$RED
-  icon="🪫"
-fi
-
-# Create simple bar
-filled=$((battery / 5))
-empty=$((20 - filled))
-bar=""
-for ((i = 0; i < filled; i++)); do bar+="█"; done
-for ((i = 0; i < empty; i++)); do bar+="░"; done
-
-echo -e "${icon}  ${color}${battery}%${NC} [${color}${bar}${NC}]"
-```
+## Firmware
+GitHub Actions builds the firmware on every push (`build.yaml`). A prebuilt image for the
+nice!nano v2 is in `firmware/nicepillz_nice_nano_v2.uf2` and on the release page. Flash it by
+double-tapping reset and copying the file to the `NICENANO` drive. The `settings_reset` build from
+the Actions artifacts clears Bluetooth bonds if pairing misbehaves.
 
 ## Credits
-https://github.com/dcpedit/pillzmod
-
-https://github.com/masters3d/zmk-config-pillzmod-nicenano
-
-https://github.com/urob/zmk-leader-key
-
-https://github.com/urob/zmk-helpers
-
+- https://github.com/nol00p/ZMK-NicePillz
+- https://github.com/dcpedit/pillzmod
+- https://github.com/masters3d/zmk-config-pillzmod-nicenano
+- https://github.com/urob/zmk-leader-key
+- https://github.com/urob/zmk-helpers
