@@ -69,6 +69,30 @@ Deep Sleep (timer 20min): both led off
 Sleep, 5 min timer - any keys to resume
 Deep Sleep, 20 min timer - press the esc key (0,0) to wake the board up.
 
+## PCB / ordering from JLCPCB
+`kicad/nice_pillz_niceview_v9.kicad_pcb` is the board (KiCad 10). Ready-to-upload fabrication
+files are in `kicad/jlcpcb/`:
+
+- `nice_pillz_niceview_v9_jlcpcb.zip` - upload this as-is to JLCPCB (2 layers, 1.6 mm).
+- `gerbers/` - the same files unzipped: copper, mask, paste, silkscreen, board outline (Protel
+  extensions), Excellon drills split into PTH / NPTH, and a drill map.
+
+They were generated with `kicad-cli` from the board as committed (zones refilled, DRC run:
+0 unconnected items; the remaining DRC items are pre-existing courtyard/silkscreen/library
+warnings). Regenerate after any layout change:
+
+```
+kicad-cli pcb export gerbers --output kicad/jlcpcb/gerbers/ \
+  --layers "F.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts" \
+  --subtract-soldermask --no-x2 --no-netlist --disable-aperture-macros kicad/nice_pillz_niceview_v9.kicad_pcb
+kicad-cli pcb export drill --output kicad/jlcpcb/gerbers/ --format excellon --excellon-units mm \
+  --excellon-zeros-format decimal --excellon-separate-th --drill-origin absolute \
+  --generate-map --map-format gerberx2 kicad/nice_pillz_niceview_v9.kicad_pcb
+cd kicad/jlcpcb/gerbers && zip ../nice_pillz_niceview_v9_jlcpcb.zip *
+```
+
+Note the J9 display header on this revision is ordered CS, GND, 3V3, SCK, MOSI (see Display above).
+
 ## Building locally
 GitHub Actions builds on every push (`build.yaml`). To build on a machine with Docker:
 

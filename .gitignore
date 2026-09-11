@@ -1,2 +1,5 @@
-
 .zmk/
+.DS_Store
+kicad/*-backups/
+kicad/fp-info-cache
+kicad/*.kicad_prl
