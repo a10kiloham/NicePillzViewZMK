@@ -35,28 +35,56 @@ choice ZMK_DISPLAY_STATUS_SCREEN
 endchoice
 
 config LV_Z_MEM_POOL_SIZE
-    default 4096
+    default 8192
 
 choice LV_FONT_DEFAULT
-    default LV_FONT_DEFAULT_MONTSERRAT_16
+    default LV_FONT_DEFAULT_MONTSERRAT_12
 endchoice
+
+# Canvas drawing with the larger fonts needs a bit more stack than ZMK's default.
+config ZMK_DISPLAY_DEDICATED_THREAD_STACK_SIZE
+    default 4096
 
 # Memory LCDs draw almost nothing, so keep the screen alive while idle.
 config ZMK_DISPLAY_BLANK_ON_IDLE
     default n
 
 config NICEPILLZ_STATUS_SCREEN
-    bool "Horizontal nice!view status screen (output, battery, layer, WPM)"
+    bool "Nice Pillz portrait nice!view status screen"
     default y if ZMK_DISPLAY_STATUS_SCREEN_CUSTOM
+    select LV_USE_IMG
+    select LV_USE_CANVAS
     select LV_USE_LABEL
+    select LV_DRAW_COMPLEX
     select LV_USE_THEME_MONO
-    select LV_FONT_MONTSERRAT_16
+    select LV_FONT_MONTSERRAT_8
+    select LV_FONT_MONTSERRAT_10
     select LV_FONT_MONTSERRAT_12
-    select ZMK_WIDGET_OUTPUT_STATUS
-    select ZMK_WIDGET_LAYER_STATUS
-    select ZMK_WIDGET_BATTERY_STATUS
-    select ZMK_WIDGET_BATTERY_STATUS_SHOW_PERCENTAGE
-    select ZMK_WIDGET_WPM_STATUS
+    select LV_FONT_MONTSERRAT_22
+    select ZMK_WPM
+
+if NICEPILLZ_STATUS_SCREEN
+
+config NICEPILLZ_DISPLAY_INVERTED
+    bool "Draw white on black instead of black on white"
+
+config NICEPILLZ_TIME_12H
+    bool "Show the clock as 12-hour instead of 24-hour"
+
+config NICEPILLZ_WPM_INTERVAL_MS
+    int "Minimum time between WPM updates on the display (ms)"
+    default 5000
+
+config NICEPILLZ_TIME_SYNC
+    bool "USB serial port for setting the clock from the host"
+    default y
+    depends on ZMK_USB
+    select USB_DEVICE_STACK
+    select USB_CDC_ACM
+    select SERIAL
+    select UART_INTERRUPT_DRIVEN
+
+endif # NICEPILLZ_STATUS_SCREEN
 
 endif # ZMK_DISPLAY
 

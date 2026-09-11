@@ -7,7 +7,7 @@ The layout is Linux/Gnome driven.
 
 ## Features supported
 - [x] ZMK Studio 
-- [x] nice!view display (horizontal): output/BLE profile, battery % + charging, active layer, WPM
+- [x] nice!view display (vertical): clock, battery/charging, WPM, BT profile, layer, lock indicators
 - [x] Leader key
 - [x] Home row mode
 - [x] caps word
@@ -23,21 +23,52 @@ the battery reporting is included so it can be visible in the os.
 bluetooth power, speed and timeour update too for better experience. 
 
 ## Display (nice!view)
-The v9 board carries a nice!view (Sharp 160x68 memory LCD). It is driven in its native
-landscape orientation with ZMK's stock widgets:
+The v9 board carries a nice!view (Sharp 160x68 memory LCD), mounted vertically with the header
+pins at the bottom. The status screen (`boards/shields/nicepillz/view_draw.c`) is drawn upright
+and rotated into the panel, top to bottom:
+
+![display preview](docs/display-preview.png)
+
+1. **Time** - set from the computer over USB (see below); `--:--` until it has been set.
+2. **Battery** - a battery-shaped gauge plus the percentage. On USB power the gauge is replaced by
+   a lightning bolt and the word *Charging*.
+3. **Words per minute** - a bare number, refreshed at most every 5 s
+   (`CONFIG_NICEPILLZ_WPM_INTERVAL_MS`).
+4. **Output** - a Bluetooth logo with the active profile number and a tick (connected) or cross
+   (bonded but not connected); a USB symbol when USB is the selected output.
+5. **Layer** - five numbered dots; the filled one is the highest active layer (1-5).
+6. **Lock indicators** - *Caps Lock*, *Num Lock*, *Scrl Lock* boxes at the bottom, stacked; they
+   use the host's HID lock state, replacing the old LEDs.
+
+Options (`Kconfig.defconfig`, override in `nicepillz.conf`):
+- `CONFIG_ZMK_DISPLAY=n` disables the display entirely.
+- `CONFIG_NICEPILLZ_DISPLAY_INVERTED=y` draws white on black.
+- `CONFIG_NICEPILLZ_TIME_12H=y` shows a 12-hour clock.
+- `CONFIG_NICEPILLZ_TIME_SYNC=n` removes the USB time port.
+
+### Setting the clock
+The keyboard has no clock of its own. It enumerates a second USB serial port; writing
+`T<local epoch seconds>\n` to it sets the time, and the keyboard answers `OK HH:MM`. From then on
+the time runs from the keyboard's uptime, so it keeps going over Bluetooth or unplugged, but a
+reset or deep sleep (20 min idle) clears it back to `--:--` until the next sync.
 
 ```
-+----------------------------------------+
-| [USB / BT profile + state]  [⚡ 100%]  |
-|                                        |
-| [active layer]                 WPM  42 |
-+----------------------------------------+
+scripts/nicepillz-sync-time.sh          # finds the port and sets the time
 ```
 
-- Top left: output status (USB, or BT profile number with connected / disconnected / open state).
-- Top right: battery percentage; a lightning symbol is shown while charging over USB.
-- Bottom left: name of the highest active layer.
-- Bottom right: words per minute.
+To sync automatically whenever the keyboard is plugged in, copy the script to
+`/usr/local/bin/` and add a udev rule, e.g. `/etc/udev/rules.d/90-nicepillz.rules`:
+
+```
+ACTION=="add", SUBSYSTEM=="tty", ATTRS{product}=="NicePillz", RUN+="/bin/sh -c 'sleep 2; /usr/local/bin/nicepillz-sync-time.sh /dev/%k'"
+```
+
+then `sudo udevadm control --reload`. A systemd user timer running the script every hour keeps
+drift away (the crystal is good for a couple of seconds a day).
+
+### Preview renders
+`tools/preview/build.sh` compiles the real drawing code against LVGL on the host and writes
+`docs/display-preview.png`, so layout changes can be checked without flashing.
 
 Wiring (from `kicad/nice_pillz_niceview_v9`): the display shares the SPI bus with the 74HC595
 column driver. SCK = P0.11 (D7), MOSI = P0.24 (D5), display CS = P1.01, powered from the
@@ -49,13 +80,6 @@ Boards made from the original v9 layout have J9 as GND, MOSI, CS, SCK, 3V3 and n
 wired pin by pin. Pad numbers and nets are unchanged, so the schematic still matches; only the pad
 positions inside the footprint instance moved (re-importing the footprint from the library would
 undo this).
-
-Config knobs (`boards/shields/nicepillz/nicepillz.conf`):
-- `CONFIG_ZMK_DISPLAY=n` disables the display entirely.
-- `CONFIG_ZMK_DISPLAY_INVERT=y` renders white-on-black instead of black-on-white.
-
-The layout lives in `boards/shields/nicepillz/custom_status_screen.c`; the LVGL / nice!view
-defaults are in `Kconfig.defconfig`.
 
 ## LED Behavior
 the power led shows the power status of the Board. the ble led, shows when the board is connected to bluetooth.
