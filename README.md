@@ -14,6 +14,7 @@ The layout is Linux/Gnome driven.
 <p>
 <img src="docs/kinesis-display-1.jpg" width="300" alt="nice!view cover fitted in the Kinesis Advantage shell">
 <img src="docs/kinesis-display-2.jpg" width="400" alt="nice!view cover, second view">
+<img src="docs/nicepillzview-in-place.png" width="300" alt="Other side">
 </p>
 
 ## Features supported
