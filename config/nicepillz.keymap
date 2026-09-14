@@ -86,7 +86,7 @@ ZMK_LAYER(default_layer,
     &caps_word  &hrm LGUI A  &hrm LALT S &hrm LCTRL D  &hrm LEFT_SHIFT F &kp G                      &kp H     &hrm LSHFT J   &hrm LCTRL K    &hrm LALT L &hrm LGUI SEMI  &kp SQT
     &leader     &kp Z        &kp X       &kp C         &kp V             &kp B                      &kp N     &kp M          &kp COMMA       &kp DOT     &kp SLASH       &kp LSHFT
                 &kp GRAVE    &kp INSERT  &none         &none                                                  &none          &none           &kp LBKT    &kp RBKT
-                                                            &kp LG(PG_UP)   &kp LALT         &kp RGUI   &kp LG(PG_DN)
+                                                            &kp LCTRL       &kp LALT         &kp RGUI   &kp RCTRL
                                                                             &kp HOME         &kp PG_UP
                                                 &kp BSPC    &lt LOWER ESC   &kp END          &kp PG_DN  &lt RAISE ENTER   &kp SPACE
 )
