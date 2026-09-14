@@ -80,6 +80,8 @@ files, exported with `kicad-cli` from the committed board (DRC: 0 unconnected it
 - `gerbers/` - the same files unzipped: copper, mask, paste, silkscreen, board outline (Protel
   extensions), Excellon drills split into PTH / NPTH, and a drill map.
 
+## 
+
 Changes in v10 (silkscreen v1.1) compared with the v9 boards already made:
 
 - **J9 display header** is ordered CS, GND, 3V3, SCK, MOSI to match the nice!view (see Display above).
@@ -103,12 +105,13 @@ Mostly common parts and a bit of soldering.
 | J5, J6            | 1x10 pin header, 2.54 mm               | 2   | |
 | J9                | nice!view                              | 1   | v10: plugs onto the header; v9: wire pin by pin |
 |                   | JST-EH 5-pin connector                 | 2   | display lead |
+|                   | Mill Max 0305 sockets
 | U1                | nice!nano v2                           | 1   | |
 | U2                | 74HC595                                | 1   | [Amazon](https://www.amazon.fr/dp/B093Y2MQGV) |
-| U2                | 16-pin DIP socket                      | 1   | [Amazon](https://www.amazon.fr/dp/B07ZCRTRXK) |
+| U2                | Mill Max style connected sockets       | 1   | |
 | D1, D2            | LED (PWR, BLE)                         | 2   | [Amazon](https://www.amazon.fr/dp/B005Q2MZ4Q) |
 | R1, R2            | 4.7 k resistor                         | 2   | sets LED brightness, smaller = brighter (1 k is clearly visible at 3.3 V) |
-| R3                | 330 R (red/green/yellow) or 100 R (blue/white) | 1 | v10 only, switch LED series resistor |
+| R3                | 330 R (red/green/yellow) or 100 R (blue/white) | 1 | switch LED series resistor |
 | Battery, Ext. PWR Switch | 2-pin screw terminal, 2.54 mm   | 2   | v9 boards have a third one for an external reset |
 | Switch LED        | 1x2 pin header, 2.54 mm                | 1   | v10 only |
 |                   | 6 mm tactile reset button              | 1   | |
@@ -116,6 +119,10 @@ Mostly common parts and a bit of soldering.
 |                   | 3.7 V LiPo battery, 2000 mAh           | 1   | [Amazon](https://www.amazon.fr/dp/B08214DJLJ) |
 |                   | USB-C panel mount extension            | 1   | [AliExpress](https://fr.aliexpress.com/item/1005009401577622.html) |
 |                   | Display cover, 3D printed              | 1   | `housing_stl/niceview_cover.stl` |
+
+## 3D Printed Parts
+Thanks to `happy panda` for their design here: https://www.printables.com/model/1622734-kinesis-advantage-thumb-millmax-mod
+Remixed here if you're using stabilizers:
 
 ## Assembly
 A small hot plate (Miniware MHP30 or a cheaper clone) makes the SMD parts much easier.
