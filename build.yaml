@@ -23,5 +23,11 @@ include:
     shield: nicepillz
     snippet: studio-rpc-usb-uart
     cmake-args: -DCONFIG_ZMK_STUDIO=y
+    artifact-name: nicepillz_nice_nano_v2
+  - board: nice_nano_v2
+    shield: nicepillz
+    snippet: studio-rpc-usb-uart
+    cmake-args: -DCONFIG_ZMK_STUDIO=y -DCONFIG_NICEPILLZ_DISPLAY_INVERTED=y
+    artifact-name: nicepillz_nice_nano_v2_inverted
   - board: nice_nano_v2
     shield: settings_reset

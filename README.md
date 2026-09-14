@@ -129,9 +129,13 @@ A small hot plate (Miniware MHP30 or a cheaper clone) makes the SMD parts much e
 LED orientation: with the LEDs facing up, the arrow points to the left across the two pads.
 
 ## Firmware
-GitHub Actions builds the firmware on every push (`build.yaml`). A prebuilt image for the
-nice!nano v2 is in `firmware/nicepillz_nice_nano_v2.uf2` and on the release page. Flash it by
-double-tapping reset and copying the file to the `NICENANO` drive. The `settings_reset` build from
+GitHub Actions builds the firmware on every push (`build.yaml`). Prebuilt images for the
+nice!nano v2 are in `firmware/` and on the release page:
+
+- `nicepillz_nice_nano_v2.uf2` - black on light (default).
+- `nicepillz_nice_nano_v2_inverted.uf2` - light on black display (`CONFIG_NICEPILLZ_DISPLAY_INVERTED=y`).
+
+Flash by double-tapping reset and copying the file to the `NICENANO` drive. The `settings_reset` build from
 the Actions artifacts clears Bluetooth bonds if pairing misbehaves.
 
 ## Credits
