@@ -122,7 +122,7 @@ Mostly common parts and a bit of soldering.
 
 ## 3D Printed Parts
 Thanks to `happy panda` for their design here: https://www.printables.com/model/1622734-kinesis-advantage-thumb-millmax-mod
-Remixed here if you're using stabilizers:
+Remixed here if you're using stabilizers: https://www.printables.com/model/1842360-kinesis-thumb-cluster-pcb-replacement-millz-mod-co
 
 ## Assembly
 A small hot plate (Miniware MHP30 or a cheaper clone) makes the SMD parts much easier.
