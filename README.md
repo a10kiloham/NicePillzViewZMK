@@ -3,7 +3,7 @@
 ## Overview
 ZMK configuration and PCB for the Nice Pillz board, a nice!nano based controller for the Kinesis
 Advantage, extended with a nice!view display. Based on https://github.com/nol00p/NicePillz.
-The layout is Linux/Gnome driven.
+The keymap follows the Kinesis Advantage legends and targets Windows.
 
 ## Hardware
 - The PCB in `kicad/` is updated for the display header and the switch LED, see [PCB](#pcb--ordering-from-jlcpcb) below.
@@ -27,6 +27,29 @@ The layout is Linux/Gnome driven.
 - [x] Tri-state layer
 - [x] Macros, with unicode support
 - [ ] Combos (supported but not yet tested)
+
+## Keymap (Windows)
+`config/nicepillz.keymap`. The base layer follows the key legends, with these choices:
+
+- Caps Lock position is **Tab**. Bottom-left (Kinesis Shift) is the **leader** key; right Shift is Shift.
+- Home-row mods on A S D F / J K L ; (Win, Alt, Ctrl, Shift). Thumbs: Ctrl, Alt | Win, Ctrl.
+- **DEL** held = LOWER, **ENTER** held = RAISE, both = FN. **Keypad** toggles the numpad layer
+  (7 8 9 on U I O, 4 5 6 on J K L, 1 2 3 on M , ., 0 and . on Up/Down, Enter on / and the right
+  thumb Enter). **Program** held = SYSTEM.
+- LOWER: F1/F2 previous/next virtual desktop, F3 task view, F4 new desktop, F8 input language,
+  F9/F10 move window to the left/right monitor, F11 show desktop, F12 close desktop; arrows on
+  H J K L; Ctrl+A/Z/X/C/V on the left hand.
+- RAISE: Win+Left/Down/Up/Right on H J K L (snap, restore, maximise, snap), Win+M on U,
+  Ctrl+= / Ctrl+- zoom on the number row, ( ) [ ] { } on E R.
+- FN: media keys on the F9-F12, PrtSc, ScrLk, Pause positions.
+- SYSTEM (hold Program): **ESC or = = bootloader** (flashing mode), F1-F4 select Bluetooth
+  profiles 1-4, F8 clears the current profile's bond, leader position or right Enter unlocks ZMK Studio.
+- Leader sequences: `4` euro sign, `D 1`/`D 2` previous/next desktop, `W 1`/`W 2` move window
+  left/right. Unicode macros (accented letters) type through [WinCompose](https://github.com/samhocevar/wincompose),
+  which must be installed on the PC.
+
+If you have edited keys in ZMK Studio, Studio's saved keymap overrides this file until you choose
+*Restore Stock Settings* in Studio.
 
 ## Battery level
 Battery reporting is enabled so the level is visible in the OS. Bluetooth and power status update
