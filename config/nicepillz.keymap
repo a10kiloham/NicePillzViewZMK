@@ -46,6 +46,14 @@ ZMK_BEHAVIOR(hrm, hold_tap,
     bindings = <&kp>, <&kp>;
 )
 
+// Bottom-left key (Kinesis Shift legend): Shift when held, leader key when tapped on its own.
+ZMK_BEHAVIOR(shift_leader, hold_tap,
+    flavor = "balanced";
+    tapping-term-ms = <200>;
+    quick-tap-ms = <150>;
+    bindings = <&kp>, <&leader>;
+)
+
 /**********************/
 /* Leader definitions */
 /**********************/
@@ -72,12 +80,14 @@ ZMK_BEHAVIOR(hrm, hold_tap,
 /*  custom Keymaps  */
 /********************/
 // Windows layout following the Kinesis Advantage legends. Caps Lock position is Tab.
+// ZMK Studio: connect over USB with the keyboard running normally (not in bootloader), then hold
+// PROGRAM and tap the left Shift key (or the right thumb Enter) to unlock.
 //
     // | ESC   | F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8 |      | F9 | F10 | F11 | F12 | PSCRN| SLCK | PAUSE| KEYPAD| PROGRAM |
     // |   =   |  1   |  2   |  3   |  4   |  5   |                |  6   |  7   |  8   |  9   |  0   |  -   |
     // |  TAB  |  Q   |  W   |  E   |  R   |  T   |                |  Y   |  U   |  I   |  O   |  P   |  \   |
     // |  TAB  |  A   |  S   |  D   |  F   |  G   |                |  H   |  J   |  K   |  L   |  ;   |  '   |   (Caps Lock key = Tab)
-    // | LEADER|  Z   |  X   |  C   |  V   |  B   |                |  N   |  M   |  ,   |  .   |  /   | SHIFT|
+    // | SHIFT |  Z   |  X   |  C   |  V   |  B   |                |  N   |  M   |  ,   |  .   |  /   | SHIFT|   (left Shift: leader when tapped alone)
     //         |  `   | INS  | LEFT |RIGHT |                              |  UP  | DOWN |  [   |  ]   |
     //                                     | CTRL | ALT  |  | WIN  | CTRL |
     //                                            | HOME |  | PGUP |
@@ -89,7 +99,7 @@ ZMK_LAYER(default_layer,
     &kp EQUAL   &kp N1       &kp N2      &kp N3        &kp N4            &kp N5                     &kp N6    &kp N7         &kp N8          &kp N9      &kp N0          &kp MINUS
     &kp TAB     &kp Q        &kp W       &kp E         &kp R             &kp T                      &kp Y     &kp U          &kp I           &kp O       &kp P           &kp BSLH
     &kp TAB     &hrm LGUI A  &hrm LALT S &hrm LCTRL D  &hrm LEFT_SHIFT F &kp G                      &kp H     &hrm LSHFT J   &hrm LCTRL K    &hrm LALT L &hrm LGUI SEMI  &kp SQT
-    &leader     &kp Z        &kp X       &kp C         &kp V             &kp B                      &kp N     &kp M          &kp COMMA       &kp DOT     &kp SLASH       &kp LSHFT
+    &shift_leader LSHFT 0  &kp Z  &kp X  &kp C  &kp V  &kp B                      &kp N     &kp M          &kp COMMA       &kp DOT     &kp SLASH       &kp LSHFT
                 &kp GRAVE    &kp INSERT  &kp LEFT      &kp RIGHT                                              &kp UP         &kp DOWN        &kp LBKT    &kp RBKT
                                                             &kp LCTRL       &kp LALT         &kp RGUI   &kp RCTRL
                                                                             &kp HOME         &kp PG_UP

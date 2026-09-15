@@ -31,7 +31,7 @@ The keymap follows the Kinesis Advantage legends and targets Windows.
 ## Keymap (Windows)
 `config/nicepillz.keymap`. The base layer follows the key legends, with these choices:
 
-- Caps Lock position is **Tab**. Bottom-left (Kinesis Shift) is the **leader** key; right Shift is Shift.
+- Caps Lock position is **Tab**. Left Shift is Shift when held and the **leader** key when tapped alone; right Shift is Shift.
 - Home-row mods on A S D F / J K L ; (Win, Alt, Ctrl, Shift). Thumbs: Ctrl, Alt | Win, Ctrl.
 - **DEL** held = LOWER, **ENTER** held = RAISE, both = FN. **Keypad** toggles the numpad layer
   (7 8 9 on U I O, 4 5 6 on J K L, 1 2 3 on M , ., 0 and . on Up/Down, Enter on / and the right
@@ -43,7 +43,14 @@ The keymap follows the Kinesis Advantage legends and targets Windows.
   Ctrl+= / Ctrl+- zoom on the number row, ( ) [ ] { } on E R.
 - FN: media keys on the F9-F12, PrtSc, ScrLk, Pause positions.
 - SYSTEM (hold Program): **ESC or = = bootloader** (flashing mode), F1-F4 select Bluetooth
-  profiles 1-4, F8 clears the current profile's bond, leader position or right Enter unlocks ZMK Studio.
+  profiles 1-4, F8 clears the current profile's bond, **left Shift or right thumb Enter = ZMK Studio unlock**.
+
+### ZMK Studio
+Open [zmk.studio](https://zmk.studio) in Chrome or Edge (Web Serial; Firefox does not work) or the
+Studio desktop app, with the keyboard plugged in over USB and running normally, and choose the
+`NicePillz` serial device. The keyboard starts locked: hold **Program** and tap **left Shift** to
+unlock, then the keymap becomes editable. Program+Esc is *not* the Studio key, it reboots into the
+bootloader for flashing, and Studio cannot connect while the `NICENANO` drive is showing.
 - Leader sequences: `4` euro sign, `D 1`/`D 2` previous/next desktop, `W 1`/`W 2` move window
   left/right. Unicode macros (accented letters) type through [WinCompose](https://github.com/samhocevar/wincompose),
   which must be installed on the PC.
