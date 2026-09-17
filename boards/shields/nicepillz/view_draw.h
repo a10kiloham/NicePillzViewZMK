@@ -23,11 +23,21 @@
 
 enum npv_transport { NPV_TRANSPORT_USB, NPV_TRANSPORT_BLE };
 
+#define NPV_WPM_POINTS 24 /* history shown in the graph, newest last */
+
+#define NPV_MOD_CTRL 0x01
+#define NPV_MOD_ALT 0x02
+#define NPV_MOD_SHIFT 0x04
+#define NPV_MOD_GUI 0x08
+
 struct npv_state {
     uint8_t battery; /* percent */
     bool charging;   /* USB power present */
 
-    uint16_t wpm;
+    uint16_t wpm;                       /* current value, shown in the graph corner */
+    uint8_t wpm_hist[NPV_WPM_POINTS];   /* one sample per update interval */
+
+    uint8_t mods; /* NPV_MOD_* bits: modifiers currently held */
 
     enum npv_transport transport;
     uint8_t ble_profile; /* 0-based */

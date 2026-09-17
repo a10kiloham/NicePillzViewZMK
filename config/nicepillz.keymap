@@ -48,7 +48,7 @@ ZMK_BEHAVIOR(hrm, hold_tap,
 
 // Bottom-left key (Kinesis Shift legend): Shift when held, leader key when tapped on its own.
 ZMK_BEHAVIOR(shift_leader, hold_tap,
-    flavor = "balanced";
+    flavor = "hold-preferred";   // any key pressed while held = Shift, so rolls never trigger the leader
     tapping-term-ms = <200>;
     quick-tap-ms = <150>;
     bindings = <&kp>, <&leader>;

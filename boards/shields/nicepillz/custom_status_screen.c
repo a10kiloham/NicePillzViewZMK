@@ -4,10 +4,11 @@
  * Portrait layout, header pins at the bottom:
  *
  *      [=====]  87%     battery gauge + percent, or "Charging" when on USB
- *        63             words per minute (refreshed at most every 5 s)
+ *      [ 63 /\/\_ ]    words per minute: history graph, one sample per 5 s
  *      (BT) 1 ok        output: bluetooth logo + profile, or a USB symbol
  *   (1)(2)(3)(4)(5)     active layer
  *     [Caps Lock]       HID lock indicators, stacked
+ *  Ctrl Alt Shift Win   held modifiers
  *
  * Everything is drawn upright into a 68x160 canvas by view_draw.c, then
  * rotated into the panel's native 160x68 buffer. All LVGL work happens on
@@ -16,6 +17,7 @@
  * SPDX-License-Identifier: MIT
  */
 #include <zephyr/kernel.h>
+#include <string.h>
 #include <lvgl.h>
 
 #include <zmk/display.h>
@@ -27,6 +29,9 @@
 #include <zmk/events/endpoint_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/events/hid_indicators_changed.h>
+#include <zmk/events/modifiers_state_changed.h>
+#include <dt-bindings/zmk/modifiers.h>
+#include <zmk/hid.h>
 #include <zmk/battery.h>
 #include <zmk/usb.h>
 #include <zmk/ble.h>
@@ -68,6 +73,12 @@ static void capture_zmk_state(struct npv_state *s) {
     s->caps_lock = ind & HID_LED_CAPS_LOCK;
     s->scroll_lock = ind & HID_LED_SCROLL_LOCK;
 
+    zmk_mod_flags_t m = zmk_hid_get_explicit_mods();
+    s->mods = ((m & (MOD_LCTL | MOD_RCTL)) ? NPV_MOD_CTRL : 0) |
+              ((m & (MOD_LALT | MOD_RALT)) ? NPV_MOD_ALT : 0) |
+              ((m & (MOD_LSFT | MOD_RSFT)) ? NPV_MOD_SHIFT : 0) |
+              ((m & (MOD_LGUI | MOD_RGUI)) ? NPV_MOD_GUI : 0);
+
     s->inverted = IS_ENABLED(CONFIG_NICEPILLZ_DISPLAY_INVERTED);
 }
 
@@ -101,24 +112,25 @@ ZMK_SUBSCRIPTION(npv_listener, zmk_ble_active_profile_changed);
 ZMK_SUBSCRIPTION(npv_listener, zmk_endpoint_changed);
 ZMK_SUBSCRIPTION(npv_listener, zmk_layer_state_changed);
 ZMK_SUBSCRIPTION(npv_listener, zmk_hid_indicators_changed);
+ZMK_SUBSCRIPTION(npv_listener, zmk_modifiers_state_changed);
 
-/* Once a second on the display queue: throttled WPM refresh. */
+/* Once a second on the display queue: every CONFIG_NICEPILLZ_WPM_INTERVAL_MS push the current
+ * WPM into the history and redraw the graph. */
 static void tick_handler(struct k_work *work) {
-    bool changed = false;
     int64_t now = k_uptime_get();
+    if ((now - last_wpm_update) < CONFIG_NICEPILLZ_WPM_INTERVAL_MS) {
+        return;
+    }
+    last_wpm_update = now;
 
     k_mutex_lock(&state_lock, K_FOREVER);
     int wpm = zmk_wpm_get_state();
-    if (wpm != state.wpm && (now - last_wpm_update) >= CONFIG_NICEPILLZ_WPM_INTERVAL_MS) {
-        state.wpm = wpm;
-        last_wpm_update = now;
-        changed = true;
-    }
+    state.wpm = wpm;
+    memmove(&state.wpm_hist[0], &state.wpm_hist[1], NPV_WPM_POINTS - 1);
+    state.wpm_hist[NPV_WPM_POINTS - 1] = wpm > 255 ? 255 : wpm;
     k_mutex_unlock(&state_lock);
 
-    if (changed) {
-        redraw_handler(NULL);
-    }
+    redraw_handler(NULL);
 }
 
 K_WORK_DEFINE(tick_work, tick_handler);

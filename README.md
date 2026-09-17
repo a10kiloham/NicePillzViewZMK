@@ -31,7 +31,7 @@ The keymap follows the Kinesis Advantage legends and targets Windows.
 ## Keymap (Windows)
 `config/nicepillz.keymap`. The base layer follows the key legends, with these choices:
 
-- Caps Lock position is **Tab**. Left Shift is Shift when held and the **leader** key when tapped alone; right Shift is Shift.
+- Caps Lock position is **Tab**. Left Shift is Shift (hold-preferred, so rolling into a key always shifts) and doubles as the **leader** key when tapped on its own; right Shift is Shift.
 - Home-row mods on A S D F / J K L ; (Win, Alt, Ctrl, Shift). Thumbs: Ctrl, Alt | Win, Ctrl.
 - **DEL** held = LOWER, **ENTER** held = RAISE, both = FN. **Keypad** toggles the numpad layer
   (7 8 9 on U I O, 4 5 6 on J K L, 1 2 3 on M , ., 0 and . on Up/Down, Enter on / and the right
@@ -71,13 +71,15 @@ rotated into the panel, top to bottom:
 
 1. **Battery** - a battery-shaped gauge plus the percentage. On USB power the gauge is replaced by
    a lightning bolt and the word *Charging*.
-2. **Words per minute** - a bare number, refreshed at most every 5 s
-   (`CONFIG_NICEPILLZ_WPM_INTERVAL_MS`).
+2. **Words per minute** - a graph of the last 24 samples (one every 5 s, so two minutes of
+   history, auto-scaled) with the current value in the corner (`CONFIG_NICEPILLZ_WPM_INTERVAL_MS`).
 3. **Output** - a Bluetooth logo with the active profile number and a tick (connected) or cross
    (bonded but not connected); a USB symbol when USB is the selected output.
 4. **Layer** - five numbered dots; the filled one is the highest active layer (1-5).
-5. **Lock indicators** - *Caps Lock*, *Num Lock*, *Scrl Lock* boxes at the bottom, stacked; they
-   use the host's HID lock state.
+5. **Lock indicators** - *Caps Lock*, *Num Lock*, *Scrl Lock* boxes, stacked; they use the
+   host's HID lock state.
+6. **Modifiers** - *Ctrl Alt Shift Win* along the bottom edge; a modifier lights up while it is
+   held (including home-row mods).
 
 Options (`boards/shields/nicepillz/Kconfig.defconfig`, override in `boards/shields/nicepillz/nicepillz.conf`):
 - `CONFIG_ZMK_DISPLAY=n` disables the display entirely.

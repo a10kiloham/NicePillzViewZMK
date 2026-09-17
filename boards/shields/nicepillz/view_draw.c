@@ -8,14 +8,19 @@
 #include <string.h>
 
 /* ---- vertical layout (upright coordinates, y grows downwards) ---- */
-#define BAT_ICON_Y 14
-#define BAT_TEXT_Y 36
-#define SEP2_Y 58
-#define WPM_Y 62
-#define SEP3_Y 90
-#define BT_Y 93
-#define DOTS_Y 117
-#define LOCKS_BOTTOM NPV_H
+#define BAT_ICON_Y 4
+#define BAT_TEXT_Y 24
+#define SEP2_Y 41
+#define GRAPH_X 4
+#define GRAPH_Y 44
+#define GRAPH_W 60
+#define GRAPH_H 30
+#define SEP3_Y 76
+#define BT_Y 78
+#define DOTS_Y 106
+#define MODS_Y 150
+#define MODS_H 9
+#define LOCKS_BOTTOM (MODS_Y - 2)
 
 #define BAT_ICON_X 10
 #define BAT_ICON_W 42
@@ -89,9 +94,36 @@ static void draw_battery(lv_obj_t *c, const struct npv_state *st) {
 }
 
 static void draw_wpm(lv_obj_t *c, const struct npv_state *st) {
+    /* frame */
+    rect(c, GRAPH_X, GRAPH_Y, GRAPH_W, GRAPH_H, 2, false, 1, fg);
+
+    /* history as a polyline, auto-scaled, newest sample on the right */
+    const lv_coord_t x0 = GRAPH_X + 2, x1 = GRAPH_X + GRAPH_W - 3;
+    const lv_coord_t y_top = GRAPH_Y + 2, y_bot = GRAPH_Y + GRAPH_H - 3;
+    uint16_t vmax = 30;
+    for (int i = 0; i < NPV_WPM_POINTS; i++) {
+        if (st->wpm_hist[i] > vmax) {
+            vmax = st->wpm_hist[i];
+        }
+    }
+    lv_point_t pts[NPV_WPM_POINTS];
+    for (int i = 0; i < NPV_WPM_POINTS; i++) {
+        pts[i].x = x0 + (i * (x1 - x0)) / (NPV_WPM_POINTS - 1);
+        pts[i].y = y_bot - ((y_bot - y_top) * st->wpm_hist[i]) / vmax;
+    }
+    lv_draw_line_dsc_t d;
+    lv_draw_line_dsc_init(&d);
+    d.color = fg;
+    d.width = 1;
+    lv_canvas_draw_line(c, pts, NPV_WPM_POINTS, &d);
+
+    /* current value in the top-left corner of the frame, on a clear patch */
     char buf[8];
     snprintf(buf, sizeof(buf), "%u", st->wpm);
-    text(c, &lv_font_montserrat_22, 0, WPM_Y, NPV_W, LV_TEXT_ALIGN_CENTER, fg, buf);
+    lv_point_t sz;
+    lv_txt_get_size(&sz, buf, &lv_font_montserrat_10, 0, 0, LV_COORD_MAX, 0);
+    rect(c, GRAPH_X + 2, GRAPH_Y + 2, sz.x + 3, 10, 0, true, 0, bg);
+    text(c, &lv_font_montserrat_10, GRAPH_X + 3, GRAPH_Y + 1, 24, LV_TEXT_ALIGN_LEFT, fg, buf);
 }
 
 static void draw_output(lv_obj_t *c, const struct npv_state *st) {
@@ -152,6 +184,27 @@ static void draw_locks(lv_obj_t *c, const struct npv_state *st) {
     }
 }
 
+/* Held modifiers: Ctrl, Alt, Shift, Win as a text row; the active ones get a filled box.
+ * Widths are the Montserrat 8 text widths (14+11+18+16 = 59 px, 3 px gaps -> 68 px). */
+static void draw_mods(lv_obj_t *c, const struct npv_state *st) {
+    static const struct {
+        const char *label;
+        lv_coord_t w;
+        uint8_t bit;
+    } m[4] = {{"Ctrl", 14, NPV_MOD_CTRL}, {"Alt", 11, NPV_MOD_ALT}, {"Shift", 18, NPV_MOD_SHIFT},
+              {"Win", 16, NPV_MOD_GUI}};
+    lv_coord_t x = 0;
+    for (int i = 0; i < 4; i++) {
+        bool on = st->mods & m[i].bit;
+        if (on) {
+            rect(c, x - 1, MODS_Y, m[i].w + 2, MODS_H, 2, true, 0, fg);
+        }
+        text(c, &lv_font_montserrat_8, x, MODS_Y - 1, m[i].w, LV_TEXT_ALIGN_CENTER, on ? bg : fg,
+             m[i].label);
+        x += m[i].w + 3;
+    }
+}
+
 void npv_draw(lv_obj_t *c, const struct npv_state *st) {
     fg = st->inverted ? lv_color_white() : lv_color_black();
     bg = st->inverted ? lv_color_black() : lv_color_white();
@@ -165,6 +218,7 @@ void npv_draw(lv_obj_t *c, const struct npv_state *st) {
     draw_output(c, st);
     draw_layer_dots(c, st);
     draw_locks(c, st);
+    draw_mods(c, st);
 }
 
 /*

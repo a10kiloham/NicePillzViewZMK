@@ -29,6 +29,10 @@ static void save_pbm(const char *path, const lv_color_t *buf, int w, int h) {
 
 struct scene { const char *name; struct npv_state st; };
 
+static void fill_hist(struct npv_state *st, const uint8_t *src, int n) {
+    for (int i = 0; i < NPV_WPM_POINTS; i++) st->wpm_hist[i] = src[i % n];
+}
+
 int main(void) {
     lv_init();
     static lv_disp_draw_buf_t db; static lv_color_t dbuf[NPV_PANEL_W * NPV_PANEL_H];
@@ -55,6 +59,13 @@ int main(void) {
                       .transport = NPV_TRANSPORT_BLE, .ble_profile = 0, .ble_connected = true, .layer = 3,
                       .inverted = true, .caps_lock = true}},
     };
+    static const uint8_t h1[] = {0, 0, 12, 35, 52, 61, 58, 66, 70, 63, 59, 64, 71, 68, 55, 40, 30, 44, 58, 62, 65, 60, 63, 63};
+    static const uint8_t h2[] = {0};
+    static const uint8_t h3[] = {20, 40, 80, 110, 120, 118, 95, 60, 30, 10, 0, 0, 25, 70, 100, 120, 115, 90, 70, 60, 80, 110, 120, 120};
+    static const uint8_t h4[] = {41, 38, 44, 40, 42, 39, 45, 41};
+    fill_hist(&scenes[0].st, h1, sizeof h1); fill_hist(&scenes[1].st, h2, 1);
+    fill_hist(&scenes[2].st, h3, sizeof h3); fill_hist(&scenes[3].st, h4, sizeof h4); fill_hist(&scenes[4].st, h1, sizeof h1);
+    scenes[0].st.mods = NPV_MOD_CTRL; scenes[2].st.mods = NPV_MOD_CTRL | NPV_MOD_SHIFT; scenes[4].st.mods = NPV_MOD_ALT | NPV_MOD_GUI;
     char path[64];
     for (size_t i = 0; i < sizeof(scenes) / sizeof(scenes[0]); i++) {
         npv_draw(canvas, &scenes[i].st);
