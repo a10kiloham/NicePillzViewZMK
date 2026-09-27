@@ -1,0 +1,21 @@
+NICE PILLZ VIEW - QUICK REFERENCE
+
+TOP RIGHT  F13 Caps Lock | F14 BT |
+  PrtSc | Layer | Program
+
+BLUETOOTH  hold F14 +
+  1 2 3 4   select device 1-4
+  0         Bluetooth <-> USB
+  9 (3 s)   forget this device
+
+SYSTEM     hold Program +
+  Esc or =  flash mode (NICENANO)
+  L Shift   unlock ZMK Studio
+
+LAYER  next layer, loops 1 to 5
+  Caps Lock key = F5, under X = Win
+  L thumb: Ctrl Alt / Bksp Del
+  R thumb: Prog Ctrl / Enter Spc
+
+EDIT KEYS  https://zmk.studio
+github.com/a10kiloham/NicePillzViewZMK

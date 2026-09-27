@@ -24,9 +24,72 @@ The keymap follows the Kinesis Advantage legends and targets Windows.
 - [x] Home row mods
 - [x] Caps word
 - [x] zmk-helpers
-- [x] Tri-state layer
+- [x] Layer cycle key
 - [x] Macros, with unicode support
 - [ ] Combos (supported but not yet tested)
+
+## Quick reference
+| Key | Function |
+| --- | --- |
+| F13 (the Print Screen key) | Caps Lock |
+| F14 (the Scroll Lock key) | Bluetooth layer, held or tapped before the next key |
+| Pause key, right of F14 | Print Screen |
+| Keypad key | Layer: steps to the next layer in a loop |
+| F14 then 1, 2, 3, 4 | Select Bluetooth profile 1 to 4 |
+| F14 then 0 | Toggle the output between Bluetooth and USB |
+| F14 then 9, held 3 seconds | Clear the current profile's pairing |
+| Program (top right and right thumb) | SYSTEM layer while held |
+| Program + Esc or = | Bootloader, for flashing |
+| Program + left Shift or right thumb Enter | Unlock ZMK Studio |
+| Caps Lock key, left side | F5 |
+| Key beneath X | Win (GUI) |
+| Left thumb, top | Left Ctrl, Alt |
+| Right thumb, top | Program, Right Ctrl |
+| Left thumb, bottom | Backspace, Delete (LOWER layer when held) |
+| Right thumb, bottom | Enter, Space |
+
+Notes:
+
+- F13 and F14 are the Print Screen and Scroll Lock positions. Scroll Lock and Pause are not on
+  the base layer.
+- The Layer key loops through DEFAULT, LOWER, RAISE, FN and KEYPAD, which are dots 1 to 5 on the
+  display. SYSTEM and BLUETOOTH are left out of the loop, because they are only meant to be held.
+- On the FN layer the F13, F14 and Print Screen positions are mute, volume down and volume up,
+  so the Bluetooth key is not available there.
+- ZMK cannot switch the Bluetooth radio off. F14 then 0 switches the output between Bluetooth and
+  USB instead. On battery with USB selected, the keyboard sends nothing.
+- F14 then 9 clears only the selected profile. A press shorter than three seconds does nothing.
+- Enter is a plain Enter. RAISE and the media-key FN layer are reached with the Layer key.
+- The display shows the Bluetooth logo on the left with the profile number beside it at the same
+  size. A small tick means connected, a cross means not connected, and no mark means the profile
+  is free and advertising.
+
+### Label for the bottom of the keyboard
+`docs/bottom-label.txt` fits a 3 x 3 inch label. Print it in a monospace font at 8 pt.
+
+```
+NICE PILLZ VIEW - QUICK REFERENCE
+
+TOP RIGHT  F13 Caps Lock | F14 BT |
+  PrtSc | Layer | Program
+
+BLUETOOTH  hold F14 +
+  1 2 3 4   select device 1-4
+  0         Bluetooth <-> USB
+  9 (3 s)   forget this device
+
+SYSTEM     hold Program +
+  Esc or =  flash mode (NICENANO)
+  L Shift   unlock ZMK Studio
+
+LAYER  next layer, loops 1 to 5
+  Caps Lock key = F5, under X = Win
+  L thumb: Ctrl Alt / Bksp Del
+  R thumb: Prog Ctrl / Enter Spc
+
+EDIT KEYS  https://zmk.studio
+github.com/a10kiloham/NicePillzViewZMK
+```
 
 ## Keymap (Windows)
 `config/nicepillz.keymap`. The base layer follows the key legends, with these choices:
@@ -34,8 +97,10 @@ The keymap follows the Kinesis Advantage legends and targets Windows.
 - Caps Lock position is **F5**. Left Shift is Shift (hold-preferred, so rolling into a key always shifts) and doubles as the **leader** key when tapped on its own; right Shift is Shift.
 - Home-row mods on A S D F / J K L ; (Win, Alt, Ctrl, Shift). The key beneath X is **Win**.
 - Thumbs: Ctrl, Alt | Program, Ctrl on top; Backspace, Delete | Enter, Space on the big keys.
-  **DEL** held = LOWER. Enter is a plain Enter, so RAISE and FN currently have no key.
-- **Keypad** toggles the numpad layer
+  **DEL** held = LOWER. Enter is a plain Enter.
+- Top right keys after F12: **Caps Lock** (F13), **Bluetooth** (F14), **Print Screen**, **Layer**,
+  **Program**. Layer steps to the next layer in a loop: DEFAULT, LOWER, RAISE, FN, KEYPAD.
+- KEYPAD is the numpad layer
   (7 8 9 on U I O, 4 5 6 on J K L, 1 2 3 on M , ., 0 and . on Up/Down, Enter on / and the right
   thumb Enter). **Program** held = SYSTEM, on both the top right key and the right thumb key.
 - **F14** (the Scroll Lock key) is the Bluetooth key, held or tapped before the next key:
@@ -46,7 +111,7 @@ The keymap follows the Kinesis Advantage legends and targets Windows.
   H J K L; Ctrl+A/Z/X/C/V on the left hand.
 - RAISE: Win+Left/Down/Up/Right on H J K L (snap, restore, maximise, snap), Win+M on U,
   Ctrl+= / Ctrl+- zoom on the number row, ( ) [ ] { } on E R.
-- FN: media keys on the F9-F12, PrtSc, ScrLk, Pause positions.
+- FN: media keys on the F9-F12, F13, F14 and Print Screen positions.
 - SYSTEM (hold Program): **ESC or = = bootloader** (flashing mode), F1-F4 select Bluetooth
   profiles 1-4, F8 clears the current profile's bond, **left Shift or right thumb Enter = ZMK Studio unlock**.
 
@@ -80,8 +145,9 @@ rotated into the panel, top to bottom:
    a lightning bolt and the word *Charging*.
 2. **Words per minute** - a graph of the last 24 samples (one every 5 s, so two minutes of
    history, auto-scaled) with the current value in the corner (`CONFIG_NICEPILLZ_WPM_INTERVAL_MS`).
-3. **Output** - a Bluetooth logo with the active profile number and a tick (connected) or cross
-   (bonded but not connected); a USB symbol when USB is the selected output.
+3. **Output** - a Bluetooth logo on the left with the active profile number beside it at the
+   same size, then a small tick (connected) or cross (bonded but not connected); a USB symbol
+   when USB is the selected output.
 4. **Layer** - five numbered dots; the filled one is the highest active layer (1-5).
 5. **Lock indicators** - *Caps Lock*, *Num Lock*, *Scrl Lock* boxes, stacked; they use the
    host's HID lock state.
