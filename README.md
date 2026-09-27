@@ -240,8 +240,14 @@ nice!nano v2 are in `firmware/` and on the release page:
 - `nicepillz_nice_nano_v2.uf2` - black on light (default).
 - `nicepillz_nice_nano_v2_inverted.uf2` - light on black display (`CONFIG_NICEPILLZ_DISPLAY_INVERTED=y`).
 
-Flash by double-tapping reset and copying the file to the `NICENANO` drive. The `settings_reset` build from
-the Actions artifacts clears Bluetooth bonds if pairing misbehaves.
+- `settings_reset_nice_nano_v2.uf2` - erases every stored setting: Bluetooth pairings, the keymap
+  saved by ZMK Studio, and the selected output.
+
+Flash by double-tapping reset and copying the file to the `NICENANO` drive.
+
+To reset the settings entirely, flash `settings_reset_nice_nano_v2.uf2` first. The keyboard does
+not type while it is loaded. Then double-tap reset again and flash the normal firmware. Remove the
+keyboard from each computer's Bluetooth device list before pairing again.
 
 ## Credits
 - https://github.com/nol00p/ZMK-NicePillz
