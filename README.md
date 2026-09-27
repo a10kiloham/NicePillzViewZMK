@@ -31,11 +31,16 @@ The keymap follows the Kinesis Advantage legends and targets Windows.
 ## Keymap (Windows)
 `config/nicepillz.keymap`. The base layer follows the key legends, with these choices:
 
-- Caps Lock position is **Tab**. Left Shift is Shift (hold-preferred, so rolling into a key always shifts) and doubles as the **leader** key when tapped on its own; right Shift is Shift.
-- Home-row mods on A S D F / J K L ; (Win, Alt, Ctrl, Shift). Thumbs: Ctrl, Alt | Win, Ctrl.
-- **DEL** held = LOWER, **ENTER** held = RAISE, both = FN. **Keypad** toggles the numpad layer
+- Caps Lock position is **F5**. Left Shift is Shift (hold-preferred, so rolling into a key always shifts) and doubles as the **leader** key when tapped on its own; right Shift is Shift.
+- Home-row mods on A S D F / J K L ; (Win, Alt, Ctrl, Shift). The key beneath X is **Win**.
+- Thumbs: Ctrl, Alt | Program, Ctrl on top; Backspace, Delete | Enter, Space on the big keys.
+  **DEL** held = LOWER. Enter is a plain Enter, so RAISE and FN currently have no key.
+- **Keypad** toggles the numpad layer
   (7 8 9 on U I O, 4 5 6 on J K L, 1 2 3 on M , ., 0 and . on Up/Down, Enter on / and the right
-  thumb Enter). **Program** held = SYSTEM.
+  thumb Enter). **Program** held = SYSTEM, on both the top right key and the right thumb key.
+- **F14** (the Scroll Lock key) is the Bluetooth key, held or tapped before the next key:
+  **1-4** select the Bluetooth profile, **0** toggles the output between Bluetooth and USB,
+  **9** held for 3 seconds clears the current profile's bond.
 - LOWER: F1/F2 previous/next virtual desktop, F3 task view, F4 new desktop, F8 input language,
   F9/F10 move window to the left/right monitor, F11 show desktop, F12 close desktop; arrows on
   H J K L; Ctrl+A/Z/X/C/V on the left hand.
@@ -55,8 +60,10 @@ bootloader for flashing, and Studio cannot connect while the `NICENANO` drive is
   left/right. Unicode macros (accented letters) type through [WinCompose](https://github.com/samhocevar/wincompose),
   which must be installed on the PC.
 
-If you have edited keys in ZMK Studio, Studio's saved keymap overrides this file until you choose
-*Restore Stock Settings* in Studio.
+Keys edited in ZMK Studio are stored on the keyboard and override this file. Flashing a firmware
+whose keymap file has changed discards those stored edits automatically on the first boot
+(`boards/shields/nicepillz/keymap_rev.c`), so the flashed keymap is always the default. Flashing
+the same keymap again keeps the Studio edits; *Restore Stock Settings* in Studio removes them.
 
 ## Battery level
 Battery reporting is enabled so the level is visible in the OS. Bluetooth and power status update

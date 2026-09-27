@@ -132,14 +132,17 @@ static void draw_output(lv_obj_t *c, const struct npv_state *st) {
         return;
     }
 
-    /* medium bluetooth logo on the left, profile number + state on the right */
-    text(c, &lv_font_montserrat_22, 10, BT_Y, 26, LV_TEXT_ALIGN_CENTER, fg, LV_SYMBOL_BLUETOOTH);
+    /* bluetooth logo shifted left, the active profile as a numeral of the same size next to
+     * it, and a small connection mark in the corner: tick = connected, cross = not connected,
+     * nothing = profile is free and advertising */
+    text(c, &lv_font_montserrat_22, 6, BT_Y, 22, LV_TEXT_ALIGN_CENTER, fg, LV_SYMBOL_BLUETOOTH);
 
     char num[4];
     snprintf(num, sizeof(num), "%u", st->ble_profile + 1);
-    text(c, &lv_font_montserrat_12, 38, BT_Y, 22, LV_TEXT_ALIGN_CENTER, fg, num);
+    text(c, &lv_font_montserrat_22, 28, BT_Y, 20, LV_TEXT_ALIGN_CENTER, fg, num);
+
     const char *status = st->ble_connected ? LV_SYMBOL_OK : (st->ble_open ? "" : LV_SYMBOL_CLOSE);
-    text(c, &lv_font_montserrat_10, 38, BT_Y + 14, 22, LV_TEXT_ALIGN_CENTER, fg, status);
+    text(c, &lv_font_montserrat_10, 48, BT_Y + 8, 16, LV_TEXT_ALIGN_CENTER, fg, status);
 }
 
 static void draw_layer_dots(lv_obj_t *c, const struct npv_state *st) {

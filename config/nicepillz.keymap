@@ -33,6 +33,7 @@
 #define FN      3
 #define KEYPAD  4
 #define SYSTEM  5
+#define BLUETOOTH 6
 
 /********************/
 /* custom behaviors */
@@ -52,6 +53,14 @@ ZMK_BEHAVIOR(shift_leader, hold_tap,
     tapping-term-ms = <200>;
     quick-tap-ms = <150>;
     bindings = <&kp>, <&leader>;
+)
+
+// Bluetooth layer, 9 key: clears the current profile's bond, but only after being held for 3 s.
+// A shorter press does nothing.
+ZMK_BEHAVIOR(bt_clr_hold, hold_tap,
+    flavor = "tap-preferred";
+    tapping-term-ms = <3000>;
+    bindings = <&bt>, <&none>;
 )
 
 /**********************/
@@ -79,31 +88,32 @@ ZMK_BEHAVIOR(shift_leader, hold_tap,
 /********************/
 /*  custom Keymaps  */
 /********************/
-// Windows layout following the Kinesis Advantage legends. Caps Lock position is Tab.
+// Windows layout following the Kinesis Advantage legends. Caps Lock position is F5.
 // ZMK Studio: connect over USB with the keyboard running normally (not in bootloader), then hold
 // PROGRAM and tap the left Shift key (or the right thumb Enter) to unlock.
 //
-    // | ESC   | F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8 |      | F9 | F10 | F11 | F12 | PSCRN| SLCK | PAUSE| KEYPAD| PROGRAM |
+    // | ESC   | F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8 |      | F9 | F10 | F11 | F12 | PSCRN|  BT  | PAUSE| KEYPAD| PROGRAM |   (BT = the F14 / Scroll Lock key)
     // |   =   |  1   |  2   |  3   |  4   |  5   |                |  6   |  7   |  8   |  9   |  0   |  -   |
     // |  TAB  |  Q   |  W   |  E   |  R   |  T   |                |  Y   |  U   |  I   |  O   |  P   |  \   |
-    // |  TAB  |  A   |  S   |  D   |  F   |  G   |                |  H   |  J   |  K   |  L   |  ;   |  '   |   (Caps Lock key = Tab)
+    // |  F5   |  A   |  S   |  D   |  F   |  G   |                |  H   |  J   |  K   |  L   |  ;   |  '   |   (Caps Lock key = F5)
     // | SHIFT |  Z   |  X   |  C   |  V   |  B   |                |  N   |  M   |  ,   |  .   |  /   | SHIFT|   (left Shift: leader when tapped alone)
-    //         |  `   | INS  | LEFT |RIGHT |                              |  UP  | DOWN |  [   |  ]   |
-    //                                     | CTRL | ALT  |  | WIN  | CTRL |
+    //         |  `   | WIN  | LEFT |RIGHT |                              |  UP  | DOWN |  [   |  ]   |
+    //                                     | CTRL | ALT  |  | PROG | CTRL |
     //                                            | HOME |  | PGUP |
     //                              | BSPC | DEL  | END  |  | PGDN | ENT  | SPC  |
-    // DEL = LOWER when held, ENT = RAISE when held. LOWER+RAISE = FN. KEYPAD toggles the numpad. PROGRAM = SYSTEM when held.
+    // DEL = LOWER when held. ENT is a plain Enter. KEYPAD toggles the numpad. PROGRAM (both keys) = SYSTEM when held.
+    // BT = BLUETOOTH layer, held or tapped before the next key.
 
 ZMK_LAYER(default_layer,
-    &kp ESC     &kp F1       &kp F2      &kp F3        &kp F4            &kp F5   &kp F6  &kp F7  &kp F8                    &kp F9       &kp F10          &kp F11    &kp F12 &kp PSCRN    &kp SLCK        &kp PAUSE_BREAK &tog KEYPAD  &mo SYSTEM
+    &kp ESC     &kp F1       &kp F2      &kp F3        &kp F4            &kp F5   &kp F6  &kp F7  &kp F8                    &kp F9       &kp F10          &kp F11    &kp F12 &kp PSCRN    &sl BLUETOOTH   &kp PAUSE_BREAK &tog KEYPAD  &mo SYSTEM
     &kp EQUAL   &kp N1       &kp N2      &kp N3        &kp N4            &kp N5                     &kp N6    &kp N7         &kp N8          &kp N9      &kp N0          &kp MINUS
     &kp TAB     &kp Q        &kp W       &kp E         &kp R             &kp T                      &kp Y     &kp U          &kp I           &kp O       &kp P           &kp BSLH
-    &kp TAB     &hrm LGUI A  &hrm LALT S &hrm LCTRL D  &hrm LEFT_SHIFT F &kp G                      &kp H     &hrm LSHFT J   &hrm LCTRL K    &hrm LALT L &hrm LGUI SEMI  &kp SQT
+    &kp F5      &hrm LGUI A  &hrm LALT S &hrm LCTRL D  &hrm LEFT_SHIFT F &kp G                      &kp H     &hrm LSHFT J   &hrm LCTRL K    &hrm LALT L &hrm LGUI SEMI  &kp SQT
     &shift_leader LSHFT 0  &kp Z  &kp X  &kp C  &kp V  &kp B                      &kp N     &kp M          &kp COMMA       &kp DOT     &kp SLASH       &kp LSHFT
-                &kp GRAVE    &kp INSERT  &kp LEFT      &kp RIGHT                                              &kp UP         &kp DOWN        &kp LBKT    &kp RBKT
-                                                            &kp LCTRL       &kp LALT         &kp RGUI   &kp RCTRL
+                &kp GRAVE    &kp LGUI    &kp LEFT      &kp RIGHT                                              &kp UP         &kp DOWN        &kp LBKT    &kp RBKT
+                                                            &kp LCTRL       &kp LALT         &mo SYSTEM &kp RCTRL
                                                                             &kp HOME         &kp PG_UP
-                                                &kp BSPC    &lt LOWER DEL   &kp END          &kp PG_DN  &lt RAISE ENTER   &kp SPACE
+                                                &kp BSPC    &lt LOWER DEL   &kp END          &kp PG_DN  &kp ENTER         &kp SPACE
 )
 
 // LOWER (hold DEL): Windows desktop shortcuts on the F row, editing and arrows on the left/right hands.
@@ -175,6 +185,21 @@ ZMK_LAYER(system_layer,
                                                   &trans  &trans                                        &trans  &trans
                                                           &trans                                        &trans
                                       &bl BL_TOG  &trans  &trans                                        &trans  &studio_unlock  &trans
+)
+
+// BLUETOOTH (hold the BT key, or tap it and then press the key): number row 1-4 select the
+// Bluetooth profile, 0 toggles the output between Bluetooth and USB, 9 held for 3 s clears the
+// current profile's bond.
+ZMK_LAYER(bluetooth_layer,
+    &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans     &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
+    &trans  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &trans      &trans  &trans  &trans  &bt_clr_hold BT_CLR  &out OUT_TOG  &trans
+    &trans  &trans  &trans  &trans  &trans  &trans                              &trans  &trans  &trans  &trans  &trans  &trans
+    &trans  &trans  &trans  &trans  &trans  &trans                              &trans  &trans  &trans  &trans  &trans  &trans
+    &trans  &trans  &trans  &trans  &trans  &trans                              &trans  &trans  &trans  &trans  &trans  &trans
+            &trans  &trans  &trans  &trans                                              &trans  &trans  &trans  &trans
+                                                  &trans  &trans        &trans  &trans
+                                                          &trans        &trans
+                                          &trans  &trans  &trans        &trans  &trans  &trans
 )
 
 /****************************/

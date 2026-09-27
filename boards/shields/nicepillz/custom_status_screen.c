@@ -5,7 +5,7 @@
  *
  *      [=====]  87%     battery gauge + percent, or "Charging" when on USB
  *      [ 63 /\/\_ ]    words per minute: history graph, one sample per 5 s
- *      (BT) 1 ok        output: bluetooth logo + profile, or a USB symbol
+ *      (BT) 1 ok        output: bluetooth logo + profile numeral, or a USB symbol
  *   (1)(2)(3)(4)(5)     active layer
  *     [Caps Lock]       HID lock indicators, stacked
  *  Ctrl Alt Shift Win   held modifiers
