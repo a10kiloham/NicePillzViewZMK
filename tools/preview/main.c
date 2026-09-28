@@ -76,5 +76,14 @@ int main(void) {
             save_pbm("build/panel_raw.pbm", panel_buf, NPV_PANEL_W, NPV_PANEL_H);
         }
     }
+
+    /* landscape layout: drawn straight into a canvas of the panel's native size */
+    lv_obj_t *lcanvas = lv_canvas_create(lv_scr_act());
+    lv_canvas_set_buffer(lcanvas, panel_buf, NPV_PANEL_W, NPV_PANEL_H, LV_IMG_CF_TRUE_COLOR);
+    for (size_t i = 0; i < sizeof(scenes) / sizeof(scenes[0]); i++) {
+        npv_draw_landscape(lcanvas, &scenes[i].st);
+        snprintf(path, sizeof(path), "build/landscape_%s.pbm", scenes[i].name);
+        save_pbm(path, panel_buf, NPV_PANEL_W, NPV_PANEL_H);
+    }
     return 0;
 }

@@ -70,36 +70,45 @@ static void hline(lv_obj_t *c, lv_coord_t y, lv_coord_t x1, lv_coord_t x2) {
     lv_canvas_draw_line(c, p, 2, &d);
 }
 
-static void draw_battery(lv_obj_t *c, const struct npv_state *st) {
+/* Battery block: gauge (or a charging mark) with the percentage below. (x, y) is the top left
+ * of the block and w its width. compact = only the bolt instead of the word "Charging". */
+static void draw_battery(lv_obj_t *c, const struct npv_state *st, lv_coord_t x, lv_coord_t y,
+                         lv_coord_t w, lv_coord_t icon_x, bool compact) {
     char buf[16];
 
     if (st->charging) {
         /* lightning bolt replaces the gauge */
-        text(c, &lv_font_montserrat_12, 0, BAT_ICON_Y + 2, NPV_W, LV_TEXT_ALIGN_CENTER, fg,
-             LV_SYMBOL_CHARGE " Charging");
+        if (compact) {
+            text(c, &lv_font_montserrat_22, x, y + BAT_ICON_Y - 2, w, LV_TEXT_ALIGN_CENTER, fg,
+                 LV_SYMBOL_CHARGE);
+        } else {
+            text(c, &lv_font_montserrat_12, x, y + BAT_ICON_Y + 2, w, LV_TEXT_ALIGN_CENTER, fg,
+                 LV_SYMBOL_CHARGE " Charging");
+        }
     } else {
         /* battery outline, nub and fill */
-        rect(c, BAT_ICON_X, BAT_ICON_Y, BAT_ICON_W, BAT_ICON_H, 2, false, 2, fg);
-        rect(c, BAT_ICON_X + BAT_ICON_W, BAT_ICON_Y + (BAT_ICON_H - BAT_NUB_H) / 2, BAT_NUB_W,
+        rect(c, icon_x, y + BAT_ICON_Y, BAT_ICON_W, BAT_ICON_H, 2, false, 2, fg);
+        rect(c, icon_x + BAT_ICON_W, y + BAT_ICON_Y + (BAT_ICON_H - BAT_NUB_H) / 2, BAT_NUB_W,
              BAT_NUB_H, 1, true, 0, fg);
         lv_coord_t inner_w = BAT_ICON_W - 8;
         lv_coord_t fill_w = (inner_w * (st->battery > 100 ? 100 : st->battery)) / 100;
         if (fill_w > 0) {
-            rect(c, BAT_ICON_X + 4, BAT_ICON_Y + 4, fill_w, BAT_ICON_H - 8, 0, true, 0, fg);
+            rect(c, icon_x + 4, y + BAT_ICON_Y + 4, fill_w, BAT_ICON_H - 8, 0, true, 0, fg);
         }
     }
 
     snprintf(buf, sizeof(buf), "%u%%", st->battery);
-    text(c, &lv_font_montserrat_12, 0, BAT_TEXT_Y, NPV_W, LV_TEXT_ALIGN_CENTER, fg, buf);
+    text(c, &lv_font_montserrat_12, x, y + BAT_TEXT_Y, w, LV_TEXT_ALIGN_CENTER, fg, buf);
 }
 
-static void draw_wpm(lv_obj_t *c, const struct npv_state *st) {
+static void draw_wpm(lv_obj_t *c, const struct npv_state *st, lv_coord_t gx, lv_coord_t gy,
+                     lv_coord_t gw, lv_coord_t gh) {
     /* frame */
-    rect(c, GRAPH_X, GRAPH_Y, GRAPH_W, GRAPH_H, 2, false, 1, fg);
+    rect(c, gx, gy, gw, gh, 2, false, 1, fg);
 
     /* history as a polyline, auto-scaled, newest sample on the right */
-    const lv_coord_t x0 = GRAPH_X + 2, x1 = GRAPH_X + GRAPH_W - 3;
-    const lv_coord_t y_top = GRAPH_Y + 2, y_bot = GRAPH_Y + GRAPH_H - 3;
+    const lv_coord_t x0 = gx + 2, x1 = gx + gw - 3;
+    const lv_coord_t y_top = gy + 2, y_bot = gy + gh - 3;
     uint16_t vmax = 30;
     for (int i = 0; i < NPV_WPM_POINTS; i++) {
         if (st->wpm_hist[i] > vmax) {
@@ -122,33 +131,37 @@ static void draw_wpm(lv_obj_t *c, const struct npv_state *st) {
     snprintf(buf, sizeof(buf), "%u", st->wpm);
     lv_point_t sz;
     lv_txt_get_size(&sz, buf, &lv_font_montserrat_10, 0, 0, LV_COORD_MAX, 0);
-    rect(c, GRAPH_X + 2, GRAPH_Y + 2, sz.x + 3, 10, 0, true, 0, bg);
-    text(c, &lv_font_montserrat_10, GRAPH_X + 3, GRAPH_Y + 1, 24, LV_TEXT_ALIGN_LEFT, fg, buf);
+    rect(c, gx + 2, gy + 2, sz.x + 3, 10, 0, true, 0, bg);
+    text(c, &lv_font_montserrat_10, gx + 3, gy + 1, 24, LV_TEXT_ALIGN_LEFT, fg, buf);
 }
 
-static void draw_output(lv_obj_t *c, const struct npv_state *st) {
+/* Output block, 22 + 20 + 16 px wide from x + pad; a USB symbol is centred in (x, w). */
+static void draw_output(lv_obj_t *c, const struct npv_state *st, lv_coord_t x, lv_coord_t y,
+                        lv_coord_t w, lv_coord_t pad) {
     if (st->transport == NPV_TRANSPORT_USB) {
-        text(c, &lv_font_montserrat_22, 0, BT_Y, NPV_W, LV_TEXT_ALIGN_CENTER, fg, LV_SYMBOL_USB);
+        text(c, &lv_font_montserrat_22, x, y, w, LV_TEXT_ALIGN_CENTER, fg, LV_SYMBOL_USB);
         return;
     }
 
     /* bluetooth logo shifted left, the active profile as a numeral of the same size next to
      * it, and a small connection mark in the corner: tick = connected, cross = not connected,
      * nothing = profile is free and advertising */
-    text(c, &lv_font_montserrat_22, 6, BT_Y, 22, LV_TEXT_ALIGN_CENTER, fg, LV_SYMBOL_BLUETOOTH);
+    lv_coord_t lx = x + pad;
+    text(c, &lv_font_montserrat_22, lx, y, 22, LV_TEXT_ALIGN_CENTER, fg, LV_SYMBOL_BLUETOOTH);
 
     char num[4];
     snprintf(num, sizeof(num), "%u", st->ble_profile + 1);
-    text(c, &lv_font_montserrat_22, 28, BT_Y, 20, LV_TEXT_ALIGN_CENTER, fg, num);
+    text(c, &lv_font_montserrat_22, lx + 22, y, 20, LV_TEXT_ALIGN_CENTER, fg, num);
 
     const char *status = st->ble_connected ? LV_SYMBOL_OK : (st->ble_open ? "" : LV_SYMBOL_CLOSE);
-    text(c, &lv_font_montserrat_10, 48, BT_Y + 8, 16, LV_TEXT_ALIGN_CENTER, fg, status);
+    text(c, &lv_font_montserrat_10, lx + 42, y + 8, 16, LV_TEXT_ALIGN_CENTER, fg, status);
 }
 
-static void draw_layer_dots(lv_obj_t *c, const struct npv_state *st) {
+static void draw_layer_dots(lv_obj_t *c, const struct npv_state *st, lv_coord_t x0,
+                            lv_coord_t y) {
     for (int i = 0; i < 5; i++) {
-        lv_coord_t cx = DOT_X0 + i * DOT_PITCH;
-        lv_coord_t cy = DOTS_Y + DOT_R;
+        lv_coord_t cx = x0 + i * DOT_PITCH;
+        lv_coord_t cy = y + DOT_R;
         bool active = (st->layer == i);
         char num[2] = {'1' + i, 0};
 
@@ -159,7 +172,8 @@ static void draw_layer_dots(lv_obj_t *c, const struct npv_state *st) {
     }
 }
 
-static void draw_locks(lv_obj_t *c, const struct npv_state *st) {
+static void draw_locks(lv_obj_t *c, const struct npv_state *st, lv_coord_t x, lv_coord_t w,
+                       lv_coord_t bottom) {
     const char *labels[3];
     int n = 0;
     if (st->caps_lock) {
@@ -181,47 +195,81 @@ static void draw_locks(lv_obj_t *c, const struct npv_state *st) {
     lv_coord_t text_dy = (n >= 3) ? -1 : 0;
 
     for (int i = 0; i < n; i++) {
-        lv_coord_t y = LOCKS_BOTTOM - (n - i) * row_h;
-        rect(c, LOCK_BOX_X, y, LOCK_BOX_W, row_h - 1, 2, true, 0, fg);
-        text(c, font, LOCK_BOX_X, y + text_dy, LOCK_BOX_W, LV_TEXT_ALIGN_CENTER, bg, labels[i]);
+        lv_coord_t y = bottom - (n - i) * row_h;
+        rect(c, x, y, w, row_h - 1, 2, true, 0, fg);
+        text(c, font, x, y + text_dy, w, LV_TEXT_ALIGN_CENTER, bg, labels[i]);
     }
 }
 
 /* Held modifiers: Ctrl, Alt, Shift, Win as a text row; the active ones get a filled box.
  * Widths are the Montserrat 8 text widths (14+11+18+16 = 59 px, 3 px gaps -> 68 px). */
-static void draw_mods(lv_obj_t *c, const struct npv_state *st) {
+static void draw_mods(lv_obj_t *c, const struct npv_state *st, lv_coord_t x, lv_coord_t y) {
     static const struct {
         const char *label;
         lv_coord_t w;
         uint8_t bit;
     } m[4] = {{"Ctrl", 14, NPV_MOD_CTRL}, {"Alt", 11, NPV_MOD_ALT}, {"Shift", 18, NPV_MOD_SHIFT},
               {"Win", 16, NPV_MOD_GUI}};
-    lv_coord_t x = 0;
     for (int i = 0; i < 4; i++) {
         bool on = st->mods & m[i].bit;
         if (on) {
-            rect(c, x - 1, MODS_Y, m[i].w + 2, MODS_H, 2, true, 0, fg);
+            rect(c, x - 1, y, m[i].w + 2, MODS_H, 2, true, 0, fg);
         }
-        text(c, &lv_font_montserrat_8, x, MODS_Y - 1, m[i].w, LV_TEXT_ALIGN_CENTER, on ? bg : fg,
+        text(c, &lv_font_montserrat_8, x, y - 1, m[i].w, LV_TEXT_ALIGN_CENTER, on ? bg : fg,
              m[i].label);
         x += m[i].w + 3;
     }
 }
 
+/* Portrait, 68 x 160, header pins at the bottom. */
 void npv_draw(lv_obj_t *c, const struct npv_state *st) {
     fg = st->inverted ? lv_color_white() : lv_color_black();
     bg = st->inverted ? lv_color_black() : lv_color_white();
 
     lv_canvas_fill_bg(c, bg, LV_OPA_COVER);
 
-    draw_battery(c, st);
+    draw_battery(c, st, 0, 0, NPV_W, BAT_ICON_X, false);
     hline(c, SEP2_Y, 6, NPV_W - 7);
-    draw_wpm(c, st);
+    draw_wpm(c, st, GRAPH_X, GRAPH_Y, GRAPH_W, GRAPH_H);
     hline(c, SEP3_Y, 6, NPV_W - 7);
-    draw_output(c, st);
-    draw_layer_dots(c, st);
-    draw_locks(c, st);
-    draw_mods(c, st);
+    draw_output(c, st, 0, BT_Y, NPV_W, 6);
+    draw_layer_dots(c, st, DOT_X0, DOTS_Y);
+    draw_locks(c, st, LOCK_BOX_X, LOCK_BOX_W, LOCKS_BOTTOM);
+    draw_mods(c, st, 0, MODS_Y);
+}
+
+/*
+ * Landscape, 160 x 68, the panel's native orientation (header pins on the left):
+ *
+ *   battery | WPM graph | output        top band
+ *   ------------------------------
+ *   layer dots          | lock boxes    bottom band
+ *   Ctrl Alt Shift Win  |
+ */
+#define L_SEP_Y 38
+#define L_BAT_W 50
+#define L_GRAPH_X 52
+#define L_GRAPH_W 46
+#define L_GRAPH_H 31
+#define L_OUT_X 101
+#define L_DOTS_Y 42
+#define L_MODS_Y 59
+#define L_LOCK_X 74
+#define L_LOCK_W (NPV_PANEL_W - L_LOCK_X - 2)
+
+void npv_draw_landscape(lv_obj_t *c, const struct npv_state *st) {
+    fg = st->inverted ? lv_color_white() : lv_color_black();
+    bg = st->inverted ? lv_color_black() : lv_color_white();
+
+    lv_canvas_fill_bg(c, bg, LV_OPA_COVER);
+
+    draw_battery(c, st, 0, -2, L_BAT_W, 2, true);
+    draw_wpm(c, st, L_GRAPH_X, 3, L_GRAPH_W, L_GRAPH_H);
+    draw_output(c, st, L_OUT_X, 6, NPV_PANEL_W - L_OUT_X, 0);
+    hline(c, L_SEP_Y, 4, NPV_PANEL_W - 5);
+    draw_layer_dots(c, st, DOT_X0, L_DOTS_Y);
+    draw_mods(c, st, 1, L_MODS_Y);
+    draw_locks(c, st, L_LOCK_X, L_LOCK_W, NPV_PANEL_H);
 }
 
 /*

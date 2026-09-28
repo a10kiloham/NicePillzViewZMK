@@ -14,6 +14,9 @@
  * rotated into the panel's native 160x68 buffer. All LVGL work happens on
  * the ZMK display work queue.
  *
+ * With CONFIG_NICEPILLZ_DISPLAY_LANDSCAPE the same elements are laid out for
+ * 160x68 and drawn straight into the panel buffer (header pins on the left).
+ *
  * SPDX-License-Identifier: MIT
  */
 #include <zephyr/kernel.h>
@@ -47,9 +50,11 @@
 #define HID_LED_CAPS_LOCK BIT(1)
 #define HID_LED_SCROLL_LOCK BIT(2)
 
+#if !IS_ENABLED(CONFIG_NICEPILLZ_DISPLAY_LANDSCAPE)
 static lv_color_t upright_buf[NPV_W * NPV_H];
-static lv_color_t panel_buf[NPV_PANEL_W * NPV_PANEL_H];
 static lv_obj_t *upright_canvas;
+#endif
+static lv_color_t panel_buf[NPV_PANEL_W * NPV_PANEL_H];
 static lv_obj_t *panel_canvas;
 
 static struct npv_state state;
@@ -89,8 +94,12 @@ static void redraw_handler(struct k_work *work) {
     snapshot = state;
     k_mutex_unlock(&state_lock);
 
+#if IS_ENABLED(CONFIG_NICEPILLZ_DISPLAY_LANDSCAPE)
+    npv_draw_landscape(panel_canvas, &snapshot);
+#else
     npv_draw(upright_canvas, &snapshot);
     npv_rotate(upright_buf, panel_buf);
+#endif
     lv_obj_invalidate(panel_canvas);
 }
 
@@ -148,10 +157,12 @@ lv_obj_t *zmk_display_status_screen(void) {
     lv_canvas_set_buffer(panel_canvas, panel_buf, NPV_PANEL_W, NPV_PANEL_H, LV_IMG_CF_TRUE_COLOR);
     lv_obj_align(panel_canvas, LV_ALIGN_TOP_LEFT, 0, 0);
 
+#if !IS_ENABLED(CONFIG_NICEPILLZ_DISPLAY_LANDSCAPE)
     /* scratch canvas for the upright drawing, never shown directly */
     upright_canvas = lv_canvas_create(screen);
     lv_canvas_set_buffer(upright_canvas, upright_buf, NPV_W, NPV_H, LV_IMG_CF_TRUE_COLOR);
     lv_obj_add_flag(upright_canvas, LV_OBJ_FLAG_HIDDEN);
+#endif
 
     k_mutex_lock(&state_lock, K_FOREVER);
     capture_zmk_state(&state);

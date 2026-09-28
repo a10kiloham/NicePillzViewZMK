@@ -157,6 +157,12 @@ rotated into the panel, top to bottom:
 Options (`boards/shields/nicepillz/Kconfig.defconfig`, override in `boards/shields/nicepillz/nicepillz.conf`):
 - `CONFIG_ZMK_DISPLAY=n` disables the display entirely.
 - `CONFIG_NICEPILLZ_DISPLAY_INVERTED=y` draws white on black.
+- `CONFIG_NICEPILLZ_DISPLAY_LANDSCAPE=y` uses the landscape layout: the picture is turned 90
+  degrees counterclockwise, for a display mounted with the header pins on the left. The same
+  elements are rearranged for the 160x68 shape: battery, WPM graph and output on top, layer dots
+  and modifiers bottom left, lock indicators bottom right.
+
+![landscape display preview](docs/display-preview-landscape.png)
 
 `tools/preview/build.sh` compiles the real drawing code against LVGL on the host and writes
 `docs/display-preview.png`, so layout changes can be checked without flashing.
@@ -239,7 +245,8 @@ nice!nano v2 are in `firmware/` and on the release page:
 
 - `nicepillz_nice_nano_v2.uf2` - black on light (default).
 - `nicepillz_nice_nano_v2_inverted.uf2` - light on black display (`CONFIG_NICEPILLZ_DISPLAY_INVERTED=y`).
-
+- `nicepillz_nice_nano_v2_landscape.uf2` - landscape display, black on light (`CONFIG_NICEPILLZ_DISPLAY_LANDSCAPE=y`).
+- `nicepillz_nice_nano_v2_landscape_inverted.uf2` - landscape display, light on black.
 - `settings_reset_nice_nano_v2.uf2` - erases every stored setting: Bluetooth pairings, the keymap
   saved by ZMK Studio, and the selected output.
 
