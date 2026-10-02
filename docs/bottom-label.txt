@@ -1,7 +1,7 @@
 NICE PILLZ VIEW - QUICK REFERENCE
 
-TOP RIGHT  F13 Caps Lock | F14 BT |
-  PrtSc | Layer | Program
+TOP RIGHT  F13 Unlock Studio |
+  F14 BT | PrtSc | Layer | Program
 
 BLUETOOTH  hold F14 +
   1 2 3 4   select device 1-4
@@ -10,7 +10,7 @@ BLUETOOTH  hold F14 +
 
 SYSTEM     hold Program +
   Esc or =  flash mode (NICENANO)
-  L Shift   unlock ZMK Studio
+  Caps key  Caps Lock
 
 LAYER  next layer, loops 1 to 5
   Caps Lock key = F5, under X = Win

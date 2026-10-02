@@ -31,7 +31,7 @@ The keymap follows the Kinesis Advantage legends and targets Windows.
 ## Quick reference
 | Key | Function |
 | --- | --- |
-| F13 (the Print Screen key) | Caps Lock |
+| F13 (the Print Screen key) | Unlock ZMK Studio |
 | F14 (the Scroll Lock key) | Bluetooth layer, held or tapped before the next key |
 | Pause key, right of F14 | Print Screen |
 | Keypad key | Layer: steps to the next layer in a loop |
@@ -40,12 +40,13 @@ The keymap follows the Kinesis Advantage legends and targets Windows.
 | F14 then 9, held 3 seconds | Clear the current profile's pairing |
 | Program (top right and right thumb) | SYSTEM layer while held |
 | Program + Esc or = | Bootloader, for flashing |
-| Program + left Shift or right thumb Enter | Unlock ZMK Studio |
+| Program + Caps Lock key | Caps Lock |
+| Program + left Shift | Leader key |
 | Caps Lock key, left side | F5 |
 | Key beneath X | Win (GUI) |
 | Left thumb, top | Left Ctrl, Alt |
 | Right thumb, top | Program, Right Ctrl |
-| Left thumb, bottom | Backspace, Delete (LOWER layer when held) |
+| Left thumb, bottom | Backspace, Delete |
 | Right thumb, bottom | Enter, Space |
 
 Notes:
@@ -54,12 +55,13 @@ Notes:
   the base layer.
 - The Layer key loops through DEFAULT, LOWER, RAISE, FN and KEYPAD, which are dots 1 to 5 on the
   display. SYSTEM and BLUETOOTH are left out of the loop, because they are only meant to be held.
-- On the FN layer the F13, F14 and Print Screen positions are mute, volume down and volume up,
-  so the Bluetooth key is not available there.
+- F13, F14, Print Screen, Layer and Program do the same thing on every layer.
+- Left Shift and right Shift are plain Left Shift and Right Shift. Backspace, Delete and Enter are
+  plain keys too, so they repeat when held.
 - ZMK cannot switch the Bluetooth radio off. F14 then 0 switches the output between Bluetooth and
   USB instead. On battery with USB selected, the keyboard sends nothing.
 - F14 then 9 clears only the selected profile. A press shorter than three seconds does nothing.
-- Enter is a plain Enter. RAISE and the media-key FN layer are reached with the Layer key.
+- LOWER, RAISE and the media-key FN layer are reached with the Layer key.
 - The display shows the Bluetooth logo on the left with the profile number beside it at the same
   size. A small tick means connected, a cross means not connected, and no mark means the profile
   is free and advertising.
@@ -70,8 +72,8 @@ Notes:
 ```
 NICE PILLZ VIEW - QUICK REFERENCE
 
-TOP RIGHT  F13 Caps Lock | F14 BT |
-  PrtSc | Layer | Program
+TOP RIGHT  F13 Unlock Studio |
+  F14 BT | PrtSc | Layer | Program
 
 BLUETOOTH  hold F14 +
   1 2 3 4   select device 1-4
@@ -80,7 +82,7 @@ BLUETOOTH  hold F14 +
 
 SYSTEM     hold Program +
   Esc or =  flash mode (NICENANO)
-  L Shift   unlock ZMK Studio
+  Caps key  Caps Lock
 
 LAYER  next layer, loops 1 to 5
   Caps Lock key = F5, under X = Win
@@ -94,15 +96,18 @@ github.com/a10kiloham/NicePillzViewZMK
 ## Keymap (Windows)
 `config/nicepillz.keymap`. The base layer follows the key legends, with these choices:
 
-- Caps Lock position is **F5**. Left Shift is Shift (hold-preferred, so rolling into a key always shifts) and doubles as the **leader** key when tapped on its own; right Shift is Shift.
-- Home-row mods on A S D F / J K L ; (Win, Alt, Ctrl, Shift). The key beneath X is **Win**.
-- Thumbs: Ctrl, Alt | Program, Ctrl on top; Backspace, Delete | Enter, Space on the big keys.
-  **DEL** held = LOWER. Enter is a plain Enter.
-- Top right keys after F12: **Caps Lock** (F13), **Bluetooth** (F14), **Print Screen**, **Layer**,
-  **Program**. Layer steps to the next layer in a loop: DEFAULT, LOWER, RAISE, FN, KEYPAD.
+- Caps Lock position is **F5**. Left Shift is Left Shift and right Shift is Right Shift, both plain keys.
+- Home-row mods on A S D F / J K L ; (Win, Alt, Ctrl, Shift). The key beneath X, left of the Left
+  arrow, is **Win**.
+- Thumbs: Ctrl, Alt | Program, Ctrl on top; Backspace, Delete | Enter, Space on the big keys, all
+  plain keys.
+- Top right keys after F12: **Studio unlock** (F13), **Bluetooth** (F14), **Print Screen**,
+  **Layer**, **Program**, the same on every layer. Layer steps to the next layer in a loop:
+  DEFAULT, LOWER, RAISE, FN, KEYPAD.
 - KEYPAD is the numpad layer
   (7 8 9 on U I O, 4 5 6 on J K L, 1 2 3 on M , ., 0 and . on Up/Down, Enter on / and the right
-  thumb Enter). **Program** held = SYSTEM, on both the top right key and the right thumb key.
+  thumb Enter, Num Lock on 7). The digits follow the Num Lock state, as on any numpad.
+  **Program** held = SYSTEM, on both the top right key and the right thumb key.
 - **F14** (the Scroll Lock key) is the Bluetooth key, held or tapped before the next key:
   **1-4** select the Bluetooth profile, **0** toggles the output between Bluetooth and USB,
   **9** held for 3 seconds clears the current profile's bond.
@@ -111,18 +116,19 @@ github.com/a10kiloham/NicePillzViewZMK
   H J K L; Ctrl+A/Z/X/C/V on the left hand.
 - RAISE: Win+Left/Down/Up/Right on H J K L (snap, restore, maximise, snap), Win+M on U,
   Ctrl+= / Ctrl+- zoom on the number row, ( ) [ ] { } on E R.
-- FN: media keys on the F9-F12, F13, F14 and Print Screen positions.
+- FN: F6 mute, F7 volume down, F8 volume up, F9 previous, F10 play/pause, F11 next, F12 stop.
 - SYSTEM (hold Program): **ESC or = = bootloader** (flashing mode), F1-F4 select Bluetooth
-  profiles 1-4, F8 clears the current profile's bond, **left Shift or right thumb Enter = ZMK Studio unlock**.
+  profiles 1-4, F8 clears the current profile's bond, the Caps Lock key is **Caps Lock**, left
+  Shift is the **leader** key.
 
 ### ZMK Studio
 Open [zmk.studio](https://zmk.studio) in Chrome or Edge (Web Serial; Firefox does not work) or the
 Studio desktop app, with the keyboard plugged in over USB and running normally, and choose the
-`NicePillz` serial device. The keyboard starts locked: hold **Program** and tap **left Shift** to
-unlock, then the keymap becomes editable. Program+Esc is *not* the Studio key, it reboots into the
-bootloader for flashing, and Studio cannot connect while the `NICENANO` drive is showing.
-- Leader sequences: `4` euro sign, `D 1`/`D 2` previous/next desktop, `W 1`/`W 2` move window
-  left/right. Unicode macros (accented letters) type through [WinCompose](https://github.com/samhocevar/wincompose),
+`NicePillz` serial device. The keyboard starts locked: press **F13** to unlock, then the keymap
+becomes editable. Program+Esc is *not* the Studio key, it reboots into the bootloader for
+flashing, and Studio cannot connect while the `NICENANO` drive is showing.
+- Leader sequences (hold Program, tap left Shift, then type the sequence): `4` euro sign,
+  `D 1`/`D 2` previous/next desktop, `W 1`/`W 2` move window left/right. Unicode macros (accented letters) type through [WinCompose](https://github.com/samhocevar/wincompose),
   which must be installed on the PC.
 
 Keys edited in ZMK Studio are stored on the keyboard and override this file. Flashing a firmware
