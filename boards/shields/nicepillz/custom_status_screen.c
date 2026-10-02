@@ -15,7 +15,7 @@
  * the ZMK display work queue.
  *
  * With CONFIG_NICEPILLZ_DISPLAY_LANDSCAPE the same elements are laid out for
- * 160x68 and drawn straight into the panel buffer (header pins on the left).
+ * 160x68, drawn into the panel buffer and turned 180 degrees (header pins on the right).
  *
  * SPDX-License-Identifier: MIT
  */
@@ -96,6 +96,7 @@ static void redraw_handler(struct k_work *work) {
 
 #if IS_ENABLED(CONFIG_NICEPILLZ_DISPLAY_LANDSCAPE)
     npv_draw_landscape(panel_canvas, &snapshot);
+    npv_flip(panel_buf);
 #else
     npv_draw(upright_canvas, &snapshot);
     npv_rotate(upright_buf, panel_buf);

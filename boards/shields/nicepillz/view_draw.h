@@ -56,9 +56,13 @@ struct npv_state {
 /* canvas must be NPV_W x NPV_H, LV_IMG_CF_TRUE_COLOR */
 void npv_draw(lv_obj_t *canvas, const struct npv_state *st);
 
-/* Landscape layout drawn straight into the panel's native orientation (header pins on the
- * left), no rotation needed. canvas must be NPV_PANEL_W x NPV_PANEL_H, LV_IMG_CF_TRUE_COLOR */
+/* Landscape layout, drawn for a panel with the header pins on the left. The display is mounted
+ * with the pins on the right, so npv_flip() must turn the buffer afterwards.
+ * canvas must be NPV_PANEL_W x NPV_PANEL_H, LV_IMG_CF_TRUE_COLOR */
 void npv_draw_landscape(lv_obj_t *canvas, const struct npv_state *st);
 
 /* upright: NPV_W*NPV_H pixels, panel: NPV_PANEL_W*NPV_PANEL_H pixels */
 void npv_rotate(const lv_color_t *upright, lv_color_t *panel);
+
+/* Turns a NPV_PANEL_W*NPV_PANEL_H panel buffer 180 degrees in place. */
+void npv_flip(lv_color_t *panel);

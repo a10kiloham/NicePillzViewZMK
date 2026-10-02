@@ -164,7 +164,7 @@ Options (`boards/shields/nicepillz/Kconfig.defconfig`, override in `boards/shiel
 - `CONFIG_ZMK_DISPLAY=n` disables the display entirely.
 - `CONFIG_NICEPILLZ_DISPLAY_INVERTED=y` draws white on black.
 - `CONFIG_NICEPILLZ_DISPLAY_LANDSCAPE=y` uses the landscape layout: the picture is turned 90
-  degrees counterclockwise, for a display mounted with the header pins on the left. The same
+  degrees clockwise, for a display mounted with the header pins on the right. The same
   elements are rearranged for the 160x68 shape: battery, WPM graph and output on top, layer dots
   and modifiers bottom left, lock indicators bottom right.
 

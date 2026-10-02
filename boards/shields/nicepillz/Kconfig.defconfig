@@ -69,9 +69,9 @@ config NICEPILLZ_DISPLAY_INVERTED
     bool "Draw white on black instead of black on white"
 
 config NICEPILLZ_DISPLAY_LANDSCAPE
-    bool "Landscape layout, display mounted with the header pins on the left"
+    bool "Landscape layout, display mounted with the header pins on the right"
     help
-      The picture is turned 90 degrees counterclockwise compared to the default
+      The picture is turned 90 degrees clockwise compared to the default
       portrait layout, and the elements are rearranged for the 160x68 shape.
 
 config NICEPILLZ_WPM_INTERVAL_MS

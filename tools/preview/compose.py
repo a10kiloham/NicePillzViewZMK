@@ -40,8 +40,8 @@ def compose(prefix, out, pins):
             if pins == "bottom":
                 px = x + pw // 2 - 2 * 12 + i * 12
                 py = GAP + ph - 5
-            else:  # header pins on the left
-                px = x + 5
+            else:  # header pins on the right
+                px = x + pw - 5
                 py = GAP + ph // 2 - 2 * 12 + i * 12
             draw.ellipse([px - 3, py - 3, px + 3, py + 3], fill=(200, 170, 60))
         draw.text((x, GAP + ph + 6), caption, fill=(40, 40, 40), font=font)
@@ -52,7 +52,7 @@ def compose(prefix, out, pins):
 
 
 compose("", OUT, "bottom")
-compose("landscape_", os.path.join(HERE, "..", "..", "docs", "display-preview-landscape.png"), "left")
+compose("landscape_", os.path.join(HERE, "..", "..", "docs", "display-preview-landscape.png"), "right")
 raw = Image.open(os.path.join(BUILD, "panel_raw.pbm")).convert("L")
 raw.resize((raw.width * SCALE, raw.height * SCALE), Image.NEAREST).save(
     os.path.join(HERE, "..", "..", "docs", "display-panel-raw.png"))

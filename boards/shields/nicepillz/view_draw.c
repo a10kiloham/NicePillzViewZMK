@@ -239,7 +239,8 @@ void npv_draw(lv_obj_t *c, const struct npv_state *st) {
 }
 
 /*
- * Landscape, 160 x 68, the panel's native orientation (header pins on the left):
+ * Landscape, 160 x 68, drawn in the panel's native orientation (header pins on the left). The
+ * display is mounted with the pins on the right, so the caller turns the result with npv_flip():
  *
  *   battery | WPM graph | output        top band
  *   ------------------------------
@@ -282,5 +283,13 @@ void npv_rotate(const lv_color_t *upright, lv_color_t *panel) {
         for (int x = 0; x < NPV_PANEL_W; x++) {
             panel[y * NPV_PANEL_W + x] = upright[(NPV_PANEL_W - 1 - x) * NPV_W + y];
         }
+    }
+}
+
+void npv_flip(lv_color_t *panel) {
+    for (int i = 0, j = NPV_PANEL_W * NPV_PANEL_H - 1; i < j; i++, j--) {
+        lv_color_t tmp = panel[i];
+        panel[i] = panel[j];
+        panel[j] = tmp;
     }
 }
