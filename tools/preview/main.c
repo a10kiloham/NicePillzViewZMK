@@ -65,7 +65,7 @@ int main(void) {
     static const uint8_t h4[] = {41, 38, 44, 40, 42, 39, 45, 41};
     fill_hist(&scenes[0].st, h1, sizeof h1); fill_hist(&scenes[1].st, h2, 1);
     fill_hist(&scenes[2].st, h3, sizeof h3); fill_hist(&scenes[3].st, h4, sizeof h4); fill_hist(&scenes[4].st, h1, sizeof h1);
-    scenes[0].st.mods = NPV_MOD_CTRL; scenes[2].st.mods = NPV_MOD_CTRL | NPV_MOD_SHIFT; scenes[4].st.mods = NPV_MOD_ALT | NPV_MOD_GUI;
+    scenes[0].st.mods = NPV_MOD_CTRL; scenes[2].st.mods = NPV_MOD_CTRL | NPV_MOD_SHIFT; scenes[4].st.mods = NPV_MOD_ALT | NPV_MOD_GUI; scenes[1].st.mods = NPV_MOD_PRGM;
     char path[64];
     for (size_t i = 0; i < sizeof(scenes) / sizeof(scenes[0]); i++) {
         npv_draw(canvas, &scenes[i].st);

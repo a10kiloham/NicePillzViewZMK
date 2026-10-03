@@ -74,6 +74,10 @@ config NICEPILLZ_DISPLAY_LANDSCAPE
       The picture is turned 90 degrees clockwise compared to the default
       portrait layout, and the elements are rearranged for the 160x68 shape.
 
+config NICEPILLZ_PROGRAM_LAYER
+    int "Layer that the Program key holds, shown as Prgm on the display"
+    default 5
+
 config NICEPILLZ_WPM_INTERVAL_MS
     int "Minimum time between WPM updates on the display (ms)"
     default 5000

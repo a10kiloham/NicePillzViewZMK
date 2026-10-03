@@ -18,9 +18,11 @@
 #define SEP3_Y 76
 #define BT_Y 78
 #define DOTS_Y 106
-#define MODS_Y 150
-#define MODS_H 9
-#define LOCKS_BOTTOM (MODS_Y - 2)
+#define LOCKS_Y 123
+#define LOCKS_H 12
+#define MODS1_Y 137
+#define MODS2_Y 148
+#define MODS_H 10
 
 #define BAT_ICON_X 10
 #define BAT_ICON_W 42
@@ -172,52 +174,84 @@ static void draw_layer_dots(lv_obj_t *c, const struct npv_state *st, lv_coord_t 
     }
 }
 
-static void draw_locks(lv_obj_t *c, const struct npv_state *st, lv_coord_t x, lv_coord_t w,
-                       lv_coord_t bottom) {
-    const char *labels[3];
+/* Lock indicators as one row of filled boxes in (x, w), only the active locks are shown. A
+ * single lock gets the full width and its full name, several share the row with short names,
+ * or just initials when even those do not fit. */
+static void draw_locks(lv_obj_t *c, const struct npv_state *st, lv_coord_t x, lv_coord_t y,
+                       lv_coord_t w, lv_coord_t h) {
+    static const char *const full[3] = {"Caps Lock", "Num Lock", "Scrl Lock"};
+    static const char *const brief[3] = {"Caps", "Num", "Scrl"};
+    static const char *const letter[3] = {"C", "N", "S"};
+    const bool on[3] = {st->caps_lock, st->num_lock, st->scroll_lock};
     int n = 0;
-    if (st->caps_lock) {
-        labels[n++] = "Caps Lock";
-    }
-    if (st->num_lock) {
-        labels[n++] = "Num Lock";
-    }
-    if (st->scroll_lock) {
-        labels[n++] = "Scrl Lock";
+    for (int i = 0; i < 3; i++) {
+        n += on[i];
     }
     if (n == 0) {
         return;
     }
 
-    /* stack from the bottom; shrink the rows when all three are on */
-    lv_coord_t row_h = (n >= 3) ? 9 : 12;
-    const lv_font_t *font = (n >= 3) ? &lv_font_montserrat_8 : &lv_font_montserrat_10;
-    lv_coord_t text_dy = (n >= 3) ? -1 : 0;
+    const lv_coord_t gap = 2;
+    const lv_coord_t box_w = (w - (n - 1) * gap) / n;
+    const lv_font_t *font = (n == 1) ? &lv_font_montserrat_10 : &lv_font_montserrat_8;
+    lv_coord_t text_dy = (n == 1) ? (h - 12) / 2 : (h - 10) / 2 - 1;
 
-    for (int i = 0; i < n; i++) {
-        lv_coord_t y = bottom - (n - i) * row_h;
-        rect(c, x, y, w, row_h - 1, 2, true, 0, fg);
-        text(c, font, x, y + text_dy, w, LV_TEXT_ALIGN_CENTER, bg, labels[i]);
+    /* portrait with three locks: 20 px boxes, so initials for all of them */
+    bool initials = false;
+    for (int i = 0; i < 3; i++) {
+        const char *label = (n == 1) ? full[i] : brief[i];
+        if (on[i] && lv_txt_get_width(label, strlen(label), font, 0, 0) > box_w - 2) {
+            initials = true;
+        }
+    }
+
+    lv_coord_t bx = x;
+    for (int i = 0; i < 3; i++) {
+        if (!on[i]) {
+            continue;
+        }
+        const char *label = initials ? letter[i] : (n == 1) ? full[i] : brief[i];
+        rect(c, bx, y, box_w, h, 2, true, 0, fg);
+        text(c, font, bx, y + text_dy, box_w, LV_TEXT_ALIGN_CENTER, bg, label);
+        bx += box_w + gap;
     }
 }
 
-/* Held modifiers: Ctrl, Alt, Shift, Win as a text row; the active ones get a filled box.
- * Widths are the Montserrat 8 text widths (14+11+18+16 = 59 px, 3 px gaps -> 68 px). */
-static void draw_mods(lv_obj_t *c, const struct npv_state *st, lv_coord_t x, lv_coord_t y) {
+/* Held modifiers and the Program key as a text row spread over (x, w); the active ones are
+ * drawn as filled boxes. first/count select which of Ctrl, Alt, Shift, Win, Prgm to draw, so
+ * the portrait layout can split them over two rows. */
+static void draw_mods(lv_obj_t *c, const struct npv_state *st, lv_coord_t x, lv_coord_t y,
+                      lv_coord_t w, lv_coord_t h, const lv_font_t *font, int first, int count) {
     static const struct {
         const char *label;
-        lv_coord_t w;
         uint8_t bit;
-    } m[4] = {{"Ctrl", 14, NPV_MOD_CTRL}, {"Alt", 11, NPV_MOD_ALT}, {"Shift", 18, NPV_MOD_SHIFT},
-              {"Win", 16, NPV_MOD_GUI}};
-    for (int i = 0; i < 4; i++) {
+    } m[5] = {{"Ctrl", NPV_MOD_CTRL},
+              {"Alt", NPV_MOD_ALT},
+              {"Shift", NPV_MOD_SHIFT},
+              {"Win", NPV_MOD_GUI},
+              {"Prgm", NPV_MOD_PRGM}};
+    const lv_coord_t pad = 2; /* box padding either side of the text */
+
+    lv_coord_t tw[5];
+    lv_coord_t total = 0;
+    for (int i = first; i < first + count; i++) {
+        tw[i] = lv_txt_get_width(m[i].label, strlen(m[i].label), font, 0, 0) + 2 * pad;
+        total += tw[i];
+    }
+    lv_coord_t gap = count > 1 ? (w - total) / (count - 1) : 0;
+    if (gap < 1) {
+        gap = 1;
+    }
+    lv_coord_t text_dy = (h - lv_font_get_line_height(font)) / 2;
+
+    lv_coord_t bx = x + (w - total - gap * (count - 1)) / 2;
+    for (int i = first; i < first + count; i++) {
         bool on = st->mods & m[i].bit;
         if (on) {
-            rect(c, x - 1, y, m[i].w + 2, MODS_H, 2, true, 0, fg);
+            rect(c, bx, y, tw[i], h, 2, true, 0, fg);
         }
-        text(c, &lv_font_montserrat_8, x, y - 1, m[i].w, LV_TEXT_ALIGN_CENTER, on ? bg : fg,
-             m[i].label);
-        x += m[i].w + 3;
+        text(c, font, bx, y + text_dy, tw[i], LV_TEXT_ALIGN_CENTER, on ? bg : fg, m[i].label);
+        bx += tw[i] + gap;
     }
 }
 
@@ -234,18 +268,19 @@ void npv_draw(lv_obj_t *c, const struct npv_state *st) {
     hline(c, SEP3_Y, 6, NPV_W - 7);
     draw_output(c, st, 0, BT_Y, NPV_W, 6);
     draw_layer_dots(c, st, DOT_X0, DOTS_Y);
-    draw_locks(c, st, LOCK_BOX_X, LOCK_BOX_W, LOCKS_BOTTOM);
-    draw_mods(c, st, 0, MODS_Y);
+    draw_locks(c, st, LOCK_BOX_X, LOCKS_Y, LOCK_BOX_W, LOCKS_H);
+    draw_mods(c, st, 1, MODS1_Y, NPV_W - 2, MODS_H, &lv_font_montserrat_8, 0, 3);
+    draw_mods(c, st, 1, MODS2_Y, NPV_W - 2, MODS_H, &lv_font_montserrat_8, 3, 2);
 }
 
 /*
  * Landscape, 160 x 68, drawn in the panel's native orientation (header pins on the left). The
  * display is mounted with the pins on the right, so the caller turns the result with npv_flip():
  *
- *   battery | WPM graph | output        top band
- *   ------------------------------
- *   layer dots          | lock boxes    bottom band
- *   Ctrl Alt Shift Win  |
+ *   battery | WPM graph | output          top band
+ *   --------------------------------
+ *   layer dots      | lock boxes        bottom band, first row
+ *   Ctrl Alt Shift Win Prgm            bottom band, second row
  */
 #define L_SEP_Y 38
 #define L_BAT_W 50
@@ -253,10 +288,13 @@ void npv_draw(lv_obj_t *c, const struct npv_state *st) {
 #define L_GRAPH_W 46
 #define L_GRAPH_H 31
 #define L_OUT_X 101
-#define L_DOTS_Y 42
-#define L_MODS_Y 59
-#define L_LOCK_X 74
+#define L_DOTS_Y 40
+#define L_LOCK_X 72
+#define L_LOCK_Y 41
+#define L_LOCK_H 12
 #define L_LOCK_W (NPV_PANEL_W - L_LOCK_X - 2)
+#define L_MODS_Y 54
+#define L_MODS_H 14
 
 void npv_draw_landscape(lv_obj_t *c, const struct npv_state *st) {
     fg = st->inverted ? lv_color_white() : lv_color_black();
@@ -269,8 +307,8 @@ void npv_draw_landscape(lv_obj_t *c, const struct npv_state *st) {
     draw_output(c, st, L_OUT_X, 6, NPV_PANEL_W - L_OUT_X, 0);
     hline(c, L_SEP_Y, 4, NPV_PANEL_W - 5);
     draw_layer_dots(c, st, DOT_X0, L_DOTS_Y);
-    draw_mods(c, st, 1, L_MODS_Y);
-    draw_locks(c, st, L_LOCK_X, L_LOCK_W, NPV_PANEL_H);
+    draw_locks(c, st, L_LOCK_X, L_LOCK_Y, L_LOCK_W, L_LOCK_H);
+    draw_mods(c, st, 2, L_MODS_Y, NPV_PANEL_W - 4, L_MODS_H, &lv_font_montserrat_12, 0, 5);
 }
 
 /*

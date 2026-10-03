@@ -155,10 +155,11 @@ rotated into the panel, top to bottom:
    same size, then a small tick (connected) or cross (bonded but not connected); a USB symbol
    when USB is the selected output.
 4. **Layer** - five numbered dots; the filled one is the highest active layer (1-5).
-5. **Lock indicators** - *Caps Lock*, *Num Lock*, *Scrl Lock* boxes, stacked; they use the
-   host's HID lock state.
-6. **Modifiers** - *Ctrl Alt Shift Win* along the bottom edge; a modifier lights up while it is
-   held (including home-row mods).
+5. **Lock indicators** - *Caps Lock*, *Num Lock*, *Scrl Lock* boxes in a row, only the active
+   ones; they use the host's HID lock state.
+6. **Modifiers** - *Ctrl Alt Shift Win Prgm* along the bottom edge; each lights up while the key
+   is held (home-row mods included). *Prgm* is the Program key, i.e. the SYSTEM layer
+   (`CONFIG_NICEPILLZ_PROGRAM_LAYER`).
 
 Options (`boards/shields/nicepillz/Kconfig.defconfig`, override in `boards/shields/nicepillz/nicepillz.conf`):
 - `CONFIG_ZMK_DISPLAY=n` disables the display entirely.

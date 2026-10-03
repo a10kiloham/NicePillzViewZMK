@@ -6,7 +6,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 BUILD = os.path.join(HERE, "build")
 OUT = os.path.join(HERE, "..", "..", "docs", "display-preview.png")
 SCALE = 3
-SCENES = [("typical", "On battery, BT 1, Ctrl held"), ("charging", "USB, charging, Caps"),
+SCENES = [("typical", "On battery, BT 1, Ctrl held"), ("charging", "USB, charging, Caps, Program held"),
           ("locks", "Layer 5, all locks, Ctrl+Shift"), ("unsynced", "Full battery, BT open"),
           ("inverted", "Inverted, Alt+Win held")]
 BEZEL = 14

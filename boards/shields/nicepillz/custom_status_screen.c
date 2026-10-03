@@ -7,8 +7,9 @@
  *      [ 63 /\/\_ ]    words per minute: history graph, one sample per 5 s
  *      (BT) 1 ok        output: bluetooth logo + profile numeral, or a USB symbol
  *   (1)(2)(3)(4)(5)     active layer
- *     [Caps Lock]       HID lock indicators, stacked
- *  Ctrl Alt Shift Win   held modifiers
+ *     [Caps Lock]       HID lock indicators
+ *    Ctrl Alt Shift     held modifier keys, and the Program key
+ *      Win Prgm
  *
  * Everything is drawn upright into a 68x160 canvas by view_draw.c, then
  * rotated into the panel's native 160x68 buffer. All LVGL work happens on
@@ -32,8 +33,9 @@
 #include <zmk/events/endpoint_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/events/hid_indicators_changed.h>
-#include <zmk/events/modifiers_state_changed.h>
-#include <dt-bindings/zmk/modifiers.h>
+#include <zmk/events/keycode_state_changed.h>
+#include <dt-bindings/zmk/hid_usage.h>
+#include <dt-bindings/zmk/hid_usage_pages.h>
 #include <zmk/hid.h>
 #include <zmk/battery.h>
 #include <zmk/usb.h>
@@ -61,6 +63,27 @@ static struct npv_state state;
 static K_MUTEX_DEFINE(state_lock);
 static int64_t last_wpm_update;
 
+/* Modifier keys currently down, one bit per HID usage Left Ctrl (0xE0) .. Right GUI (0xE7).
+ * ZMK never raises zmk_modifiers_state_changed, so this is tracked from the keycode events. */
+static uint8_t held_mod_keys;
+
+static uint8_t mod_bits(uint8_t keys) {
+    uint8_t m = 0;
+    if (keys & 0x11) {
+        m |= NPV_MOD_CTRL;
+    }
+    if (keys & 0x22) {
+        m |= NPV_MOD_SHIFT;
+    }
+    if (keys & 0x44) {
+        m |= NPV_MOD_ALT;
+    }
+    if (keys & 0x88) {
+        m |= NPV_MOD_GUI;
+    }
+    return m;
+}
+
 static void capture_zmk_state(struct npv_state *s) {
     s->battery = zmk_battery_state_of_charge();
     s->charging = zmk_usb_is_powered();
@@ -78,11 +101,10 @@ static void capture_zmk_state(struct npv_state *s) {
     s->caps_lock = ind & HID_LED_CAPS_LOCK;
     s->scroll_lock = ind & HID_LED_SCROLL_LOCK;
 
-    zmk_mod_flags_t m = zmk_hid_get_explicit_mods();
-    s->mods = ((m & (MOD_LCTL | MOD_RCTL)) ? NPV_MOD_CTRL : 0) |
-              ((m & (MOD_LALT | MOD_RALT)) ? NPV_MOD_ALT : 0) |
-              ((m & (MOD_LSFT | MOD_RSFT)) ? NPV_MOD_SHIFT : 0) |
-              ((m & (MOD_LGUI | MOD_RGUI)) ? NPV_MOD_GUI : 0);
+    s->mods = mod_bits(held_mod_keys);
+    if (zmk_keymap_layer_active(CONFIG_NICEPILLZ_PROGRAM_LAYER)) {
+        s->mods |= NPV_MOD_PRGM;
+    }
 
     s->inverted = IS_ENABLED(CONFIG_NICEPILLZ_DISPLAY_INVERTED);
 }
@@ -108,6 +130,15 @@ K_WORK_DEFINE(redraw_work, redraw_handler);
 
 /* Any ZMK state event: re-read everything and redraw. */
 static int zmk_event_listener(const zmk_event_t *eh) {
+    const struct zmk_keycode_state_changed *kc = as_zmk_keycode_state_changed(eh);
+    if (kc) {
+        if (kc->usage_page != HID_USAGE_KEY || kc->keycode < HID_USAGE_KEY_KEYBOARD_LEFTCONTROL ||
+            kc->keycode > HID_USAGE_KEY_KEYBOARD_RIGHT_GUI) {
+            return ZMK_EV_EVENT_BUBBLE; /* not a modifier key, nothing to show */
+        }
+        WRITE_BIT(held_mod_keys, kc->keycode - HID_USAGE_KEY_KEYBOARD_LEFTCONTROL, kc->state);
+    }
+
     k_mutex_lock(&state_lock, K_FOREVER);
     capture_zmk_state(&state);
     k_mutex_unlock(&state_lock);
@@ -122,7 +153,7 @@ ZMK_SUBSCRIPTION(npv_listener, zmk_ble_active_profile_changed);
 ZMK_SUBSCRIPTION(npv_listener, zmk_endpoint_changed);
 ZMK_SUBSCRIPTION(npv_listener, zmk_layer_state_changed);
 ZMK_SUBSCRIPTION(npv_listener, zmk_hid_indicators_changed);
-ZMK_SUBSCRIPTION(npv_listener, zmk_modifiers_state_changed);
+ZMK_SUBSCRIPTION(npv_listener, zmk_keycode_state_changed);
 
 /* Once a second on the display queue: every CONFIG_NICEPILLZ_WPM_INTERVAL_MS push the current
  * WPM into the history and redraw the graph. */
