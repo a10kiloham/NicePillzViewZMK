@@ -21,7 +21,6 @@ The keymap follows the Kinesis Advantage legends and targets Windows.
 - [x] ZMK Studio
 - [x] nice!view display (vertical): battery/charging, WPM, BT profile, layer, lock indicators
 - [x] Leader key
-- [x] Home row mods
 - [x] Caps word
 - [x] zmk-helpers
 - [x] Layer cycle key
@@ -97,8 +96,8 @@ github.com/a10kiloham/NicePillzViewZMK
 `config/nicepillz.keymap`. The base layer follows the key legends, with these choices:
 
 - Caps Lock position is **F5**. Left Shift is Left Shift and right Shift is Right Shift, both plain keys.
-- Home-row mods on A S D F / J K L ; (Win, Alt, Ctrl, Shift). The key beneath X, left of the Left
-  arrow, is **Win**.
+- The letter rows are plain keys, no home-row mods. The key beneath X, left of the Left arrow, is
+  **Win**.
 - Thumbs: Ctrl, Alt | Program, Ctrl on top; Backspace, Delete | Enter, Space on the big keys, all
   plain keys.
 - Top right keys after F12: **Studio unlock** (F13), **Bluetooth** (F14), **Print Screen**,
@@ -158,7 +157,7 @@ rotated into the panel, top to bottom:
 5. **Lock indicators** - *Caps Lock*, *Num Lock*, *Scrl Lock* boxes in a row, only the active
    ones; they use the host's HID lock state.
 6. **Modifiers** - *Ctrl Alt Shift Win Prgm* along the bottom edge; each lights up while the key
-   is held (home-row mods included). *Prgm* is the Program key, i.e. the SYSTEM layer
+   is held. *Prgm* is the Program key, i.e. the SYSTEM layer
    (`CONFIG_NICEPILLZ_PROGRAM_LAYER`).
 
 Options (`boards/shields/nicepillz/Kconfig.defconfig`, override in `boards/shields/nicepillz/nicepillz.conf`):
@@ -279,9 +278,8 @@ while ($true) { $l = $p.ReadLine(); if ($l -match "keycode|hold-tap|hold_tap") {
 
 Every key press and release appears as `hid_listener_keycode_pressed ... keycode 0x..`:
 0xE0 to 0xE7 are the modifier keys (E0 Left Ctrl, E1 Left Shift, E2 Left Alt, E3 Left Win, E4 to
-E7 the right-hand ones). The hold-tap lines name the key position and say whether a home-row key
-was decided as a hold or a tap, and why. A modifier that arrives right after a letter on the
-home row, with a `decided hold` line in between, is the home-row mod firing on a fast roll.
+E7 the right-hand ones). The hold-tap lines name the key position of the few remaining hold-taps
+(the Bluetooth layer's 9 key) and say whether they were decided as a hold or a tap, and why.
 
 ## Credits
 - https://github.com/nol00p/ZMK-NicePillz
