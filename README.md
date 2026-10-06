@@ -256,8 +256,9 @@ nice!nano v2 are in `firmware/` and on the release page:
 - `nicepillz_nice_nano_v2_landscape_inverted.uf2` - landscape display, light on black.
 - `settings_reset_nice_nano_v2.uf2` - erases every stored setting: Bluetooth pairings, the keymap
   saved by ZMK Studio, and the selected output.
-- `nicepillz_nice_nano_v2_landscape_usblog.uf2` - the landscape firmware with debug logging over
-  USB, for finding out what the keyboard thinks it sent (see below). Slower, use only to debug.
+- `nicepillz_nice_nano_v2_usblog.uf2` and `nicepillz_nice_nano_v2_landscape_usblog.uf2` - the
+  portrait and landscape firmware with debug logging over USB, for finding out what the keyboard
+  thinks it sent (see below). Slower, use only to debug.
 
 Flash by double-tapping reset and copying the file to the `NICENANO` drive.
 
@@ -266,8 +267,8 @@ not type while it is loaded. Then double-tap reset again and flash the normal fi
 keyboard from each computer's Bluetooth device list before pairing again.
 
 ### Debug logging over USB
-Flash `nicepillz_nice_nano_v2_landscape_usblog.uf2` (built with `-S zmk-usb-logging` and
-`CONFIG_ZMK_LOG_LEVEL_DBG=y`). The keyboard then shows up as two serial ports: one is ZMK Studio,
+Flash `nicepillz_nice_nano_v2_usblog.uf2` (portrait) or `nicepillz_nice_nano_v2_landscape_usblog.uf2`
+(landscape), built with `-S zmk-usb-logging` and `CONFIG_ZMK_LOG_LEVEL_DBG=y`. The keyboard then shows up as two serial ports: one is ZMK Studio,
 the other streams the log. Open the log port at any baud rate, for example in PowerShell:
 
 ```
