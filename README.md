@@ -31,13 +31,12 @@ The keymap follows the Kinesis Advantage legends and targets Windows.
 | Key | Function |
 | --- | --- |
 | F13 (the Print Screen key) | Unlock ZMK Studio |
-| F14 (the Scroll Lock key) | Bluetooth layer, held or tapped before the next key |
+| F14 (the Scroll Lock key) | F14; with Shift: output between Bluetooth and USB |
 | Pause key, right of F14 | Print Screen |
 | Keypad key | Layer: steps to the next layer in a loop |
-| F14 then 1, 2, 3, 4 | Select Bluetooth profile 1 to 4 |
-| F14 then 0 | Toggle the output between Bluetooth and USB |
-| F14 then 9, held 3 seconds | Clear the current profile's pairing |
 | Program (top right and right thumb) | SYSTEM layer while held |
+| Program + F1, F2, F3, F4 | Select Bluetooth profile 1 to 4 |
+| Program + F8 | Forget all four Bluetooth pairings |
 | Program + Esc or = | Bootloader, for flashing |
 | Program + Caps Lock key | Caps Lock |
 | Program + left Shift | Leader key |
@@ -53,13 +52,16 @@ Notes:
 - F13 and F14 are the Print Screen and Scroll Lock positions. Scroll Lock and Pause are not on
   the base layer.
 - The Layer key loops through DEFAULT, LOWER, RAISE, FN and KEYPAD, which are dots 1 to 5 on the
-  display. SYSTEM and BLUETOOTH are left out of the loop, because they are only meant to be held.
+  display. SYSTEM is left out of the loop, because it is only meant to be held.
 - F13, F14, Print Screen, Layer and Program do the same thing on every layer.
+- Pairing: hold Program and tap F1 to F4 to pick a profile; a free profile advertises straight
+  away, so pair from the PC. Program + F8 forgets all four pairings at once; remove `NicePillz`
+  from the PC's Bluetooth list too before pairing again.
 - Left Shift and right Shift are plain Left Shift and Right Shift. Backspace, Delete and Enter are
   plain keys too, so they repeat when held.
-- ZMK cannot switch the Bluetooth radio off. F14 then 0 switches the output between Bluetooth and
-  USB instead. On battery with USB selected, the keyboard sends nothing.
-- F14 then 9 clears only the selected profile. A press shorter than three seconds does nothing.
+- ZMK cannot switch the Bluetooth radio off. Shift + F14 switches the output between Bluetooth
+  and USB instead; with USB selected and no cable, the keyboard sends nothing. The display shows
+  a USB symbol while USB is selected.
 - LOWER, RAISE and the media-key FN layer are reached with the Layer key.
 - The display shows the Bluetooth logo on the left with the profile number beside it at the same
   size. A small tick means connected, a cross means not connected, and no mark means the profile
@@ -72,14 +74,12 @@ Notes:
 NICE PILLZ VIEW - QUICK REFERENCE
 
 TOP RIGHT  F13 Unlock Studio |
-  F14 BT | PrtSc | Layer | Program
-
-BLUETOOTH  hold F14 +
-  1 2 3 4   select device 1-4
-  0         Bluetooth <-> USB
-  9 (3 s)   forget this device
+  F14 | PrtSc | Layer | Program
+  Shift+F14  Bluetooth <-> USB
 
 SYSTEM     hold Program +
+  F1 F2 F3 F4  Bluetooth device 1-4
+  F8        forget all pairings
   Esc or =  flash mode (NICENANO)
   Caps key  Caps Lock
 
@@ -100,25 +100,22 @@ github.com/a10kiloham/NicePillzViewZMK
   **Win**.
 - Thumbs: Ctrl, Alt | Program, Ctrl on top; Backspace, Delete | Enter, Space on the big keys, all
   plain keys.
-- Top right keys after F12: **Studio unlock** (F13), **Bluetooth** (F14), **Print Screen**,
-  **Layer**, **Program**, the same on every layer. Layer steps to the next layer in a loop:
+- Top right keys after F12: **Studio unlock** (F13), **F14** (Shift + F14 = Bluetooth/USB
+  output), **Print Screen**, **Layer**, **Program**, the same on every layer. Layer steps to the next layer in a loop:
   DEFAULT, LOWER, RAISE, FN, KEYPAD.
 - KEYPAD is the numpad layer
   (7 8 9 on U I O, 4 5 6 on J K L, 1 2 3 on M , ., 0 and . on Up/Down, Enter on / and the right
   thumb Enter, Num Lock on 7). The digits follow the Num Lock state, as on any numpad.
   **Program** held = SYSTEM, on both the top right key and the right thumb key.
-- **F14** (the Scroll Lock key) is the Bluetooth key, held or tapped before the next key:
-  **1-4** select the Bluetooth profile, **0** toggles the output between Bluetooth and USB,
-  **9** held for 3 seconds clears the current profile's bond.
 - LOWER: F1/F2 previous/next virtual desktop, F3 task view, F4 new desktop, F8 input language,
   F9/F10 move window to the left/right monitor, F11 show desktop, F12 close desktop; arrows on
   H J K L; Ctrl+A/Z/X/C/V on the left hand.
 - RAISE: Win+Left/Down/Up/Right on H J K L (snap, restore, maximise, snap), Win+M on U,
   Ctrl+= / Ctrl+- zoom on the number row, ( ) [ ] { } on E R.
 - FN: F6 mute, F7 volume down, F8 volume up, F9 previous, F10 play/pause, F11 next, F12 stop.
-- SYSTEM (hold Program): **ESC or = = bootloader** (flashing mode), F1-F4 select Bluetooth
-  profiles 1-4, F8 clears the current profile's bond, the Caps Lock key is **Caps Lock**, left
-  Shift is the **leader** key.
+- SYSTEM (hold Program): **ESC or = = bootloader** (flashing mode), **F1-F4 select Bluetooth
+  profiles 1-4**, **F8 forgets all four Bluetooth pairings**, the Caps Lock key is **Caps Lock**,
+  left Shift is the **leader** key.
 
 ### ZMK Studio
 Open [zmk.studio](https://zmk.studio) in Chrome or Edge (Web Serial; Firefox does not work) or the

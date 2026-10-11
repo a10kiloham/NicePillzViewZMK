@@ -32,17 +32,14 @@
 #define FN      3
 #define KEYPAD  4
 #define SYSTEM  5
-#define BLUETOOTH 6
 
 /********************/
 /* custom behaviors */
 /********************/
-// Bluetooth layer, 9 key: clears the current profile's bond, but only after being held for 3 s.
-// A shorter press does nothing.
-ZMK_BEHAVIOR(bt_clr_hold, hold_tap,
-    flavor = "tap-preferred";
-    tapping-term-ms = <3000>;
-    bindings = <&bt>, <&none>;
+// F14 key: F14, or with Shift held the output switches between Bluetooth and USB.
+ZMK_BEHAVIOR(f14_out, mod_morph,
+    bindings = <&kp F14>, <&out OUT_TOG>;
+    mods = <(MOD_LSFT|MOD_RSFT)>;
 )
 
 /**********************/
@@ -74,7 +71,7 @@ ZMK_BEHAVIOR(bt_clr_hold, hold_tap,
 // ZMK Studio: connect over USB with the keyboard running normally (not in bootloader), then press
 // the F13 key to unlock.
 //
-    // | ESC   | F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8 |      | F9 | F10 | F11 | F12 |UNLOCK|  BT  | PSCRN| LAYER | PROGRAM |   (F13 = Studio unlock, F14 = BT)
+    // | ESC   | F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8 |      | F9 | F10 | F11 | F12 |UNLOCK| F14  | PSCRN| LAYER | PROGRAM |   (F13 = Studio unlock, Shift+F14 = BT/USB output)
     // |   =   |  1   |  2   |  3   |  4   |  5   |                |  6   |  7   |  8   |  9   |  0   |  -   |
     // |  TAB  |  Q   |  W   |  E   |  R   |  T   |                |  Y   |  U   |  I   |  O   |  P   |  \   |
     // |  F5   |  A   |  S   |  D   |  F   |  G   |                |  H   |  J   |  K   |  L   |  ;   |  '   |   (Caps Lock key = F5)
@@ -85,10 +82,10 @@ ZMK_BEHAVIOR(bt_clr_hold, hold_tap,
     //                              | BSPC | DEL  | END  |  | PGDN | ENT  | SPC  |
     // BSPC, DEL and ENT are plain keys. PROGRAM (both keys) = SYSTEM when held.
     // LAYER steps to the next layer in a loop: DEFAULT > LOWER > RAISE > FN > KEYPAD > DEFAULT.
-    // BT = BLUETOOTH layer, held or tapped before the next key.
+    // Bluetooth: PROGRAM + F1-F4 select the profile, PROGRAM + F8 forgets all four.
 
 ZMK_LAYER(default_layer,
-    &kp ESC     &kp F1       &kp F2      &kp F3        &kp F4            &kp F5   &kp F6  &kp F7  &kp F8                    &kp F9       &kp F10          &kp F11    &kp F12 &studio_unlock  &sl BLUETOOTH   &kp PSCRN       &to LOWER  &mo SYSTEM
+    &kp ESC     &kp F1       &kp F2      &kp F3        &kp F4            &kp F5   &kp F6  &kp F7  &kp F8                    &kp F9       &kp F10          &kp F11    &kp F12 &studio_unlock  &f14_out        &kp PSCRN       &to LOWER  &mo SYSTEM
     &kp EQUAL   &kp N1       &kp N2      &kp N3        &kp N4            &kp N5                     &kp N6    &kp N7         &kp N8          &kp N9      &kp N0          &kp MINUS
     &kp TAB     &kp Q        &kp W       &kp E         &kp R             &kp T                      &kp Y     &kp U          &kp I           &kp O       &kp P           &kp BSLH
     &kp F5      &kp A        &kp S       &kp D         &kp F             &kp G                      &kp H     &kp J          &kp K           &kp L       &kp SEMI        &kp SQT
@@ -158,10 +155,10 @@ ZMK_LAYER(keypad_layer,
                                           &trans  &trans  &trans        &trans  &kp KP_ENTER  &trans
 )
 
-// SYSTEM (hold PROGRAM): ESC or = -> bootloader (flashing mode), F1-F4 Bluetooth profiles, F8 clear
-// the current profile's bond, Caps Lock key -> Caps Lock, left Shift -> leader key.
+// SYSTEM (hold PROGRAM): ESC or = -> bootloader (flashing mode), F1-F4 select Bluetooth profile
+// 1-4, F8 forgets all four Bluetooth pairings, Caps Lock key -> Caps Lock, left Shift -> leader key.
 ZMK_LAYER(system_layer,
-    &bootloader  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &trans  &trans  &trans  &bt BT_CLR       &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
+    &bootloader  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &trans  &trans  &trans  &bt BT_CLR_ALL   &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
     &bootloader  &trans  &trans  &trans  &trans  &trans                                                                   &trans  &trans  &trans  &trans  &trans  &trans
     &trans  &trans  &trans  &trans  &trans  &trans                                                                   &trans  &trans  &trans  &trans  &trans  &trans
     &kp CAPS  &trans  &trans  &trans  &trans  &trans                                                                 &trans  &trans  &trans  &trans  &trans  &trans
@@ -170,21 +167,6 @@ ZMK_LAYER(system_layer,
                                                   &trans  &trans                                        &trans  &trans
                                                           &trans                                        &trans
                                           &trans  &trans  &trans                                        &trans  &trans  &trans
-)
-
-// BLUETOOTH (hold the BT key, or tap it and then press the key): number row 1-4 select the
-// Bluetooth profile, 0 toggles the output between Bluetooth and USB, 9 held for 3 s clears the
-// current profile's bond.
-ZMK_LAYER(bluetooth_layer,
-    &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans     &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
-    &trans  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &trans      &trans  &trans  &trans  &bt_clr_hold BT_CLR  &out OUT_TOG  &trans
-    &trans  &trans  &trans  &trans  &trans  &trans                              &trans  &trans  &trans  &trans  &trans  &trans
-    &trans  &trans  &trans  &trans  &trans  &trans                              &trans  &trans  &trans  &trans  &trans  &trans
-    &trans  &trans  &trans  &trans  &trans  &trans                              &trans  &trans  &trans  &trans  &trans  &trans
-            &trans  &trans  &trans  &trans                                              &trans  &trans  &trans  &trans
-                                                  &trans  &trans        &trans  &trans
-                                                          &trans        &trans
-                                          &trans  &trans  &trans        &trans  &trans  &trans
 )
 
 // No tri-state (LOWER + RAISE = FN) rule: a conditional layer is switched off again whenever its

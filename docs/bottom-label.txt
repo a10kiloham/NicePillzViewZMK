@@ -1,14 +1,12 @@
 NICE PILLZ VIEW - QUICK REFERENCE
 
 TOP RIGHT  F13 Unlock Studio |
-  F14 BT | PrtSc | Layer | Program
-
-BLUETOOTH  hold F14 +
-  1 2 3 4   select device 1-4
-  0         Bluetooth <-> USB
-  9 (3 s)   forget this device
+  F14 | PrtSc | Layer | Program
+  Shift+F14  Bluetooth <-> USB
 
 SYSTEM     hold Program +
+  F1 F2 F3 F4  Bluetooth device 1-4
+  F8        forget all pairings
   Esc or =  flash mode (NICENANO)
   Caps key  Caps Lock
 
