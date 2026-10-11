@@ -251,17 +251,22 @@ nice!nano v2 are in `firmware/` and on the release page:
 - `nicepillz_nice_nano_v2_inverted.uf2` - light on black display (`CONFIG_NICEPILLZ_DISPLAY_INVERTED=y`).
 - `nicepillz_nice_nano_v2_landscape.uf2` - landscape display, black on light (`CONFIG_NICEPILLZ_DISPLAY_LANDSCAPE=y`).
 - `nicepillz_nice_nano_v2_landscape_inverted.uf2` - landscape display, light on black.
-- `settings_reset_nice_nano_v2.uf2` - erases every stored setting: Bluetooth pairings, the keymap
-  saved by ZMK Studio, and the selected output.
+- `nicepillz_nice_nano_v2_reset.uf2` and `nicepillz_nice_nano_v2_landscape_reset.uf2` - the normal
+  firmware that also erases every stored setting each time it boots: Bluetooth pairings, the
+  keymap saved by ZMK Studio, and the selected output. The keys and the display keep working.
 - `nicepillz_nice_nano_v2_usblog.uf2` and `nicepillz_nice_nano_v2_landscape_usblog.uf2` - the
   portrait and landscape firmware with debug logging over USB, for finding out what the keyboard
   thinks it sent (see below). Slower, use only to debug.
 
-Flash by double-tapping reset and copying the file to the `NICENANO` drive.
+**Into flash mode:** hold Program and tap Esc or =. If the keymap is not responding, double-tap
+the reset button on the board. Either way the `NICENANO` drive appears; copying a `.uf2` onto it
+flashes and restarts the keyboard.
 
-To reset the settings entirely, flash `settings_reset_nice_nano_v2.uf2` first. The keyboard does
-not type while it is loaded. Then double-tap reset again and flash the normal firmware. Remove the
-keyboard from each computer's Bluetooth device list before pairing again.
+For Bluetooth trouble, Program + F8 (forget all pairings) is usually enough. To erase every
+setting, flash the `_reset` firmware for your display orientation, let it boot once, then enter
+flash mode again and flash the normal firmware. While the `_reset` firmware is loaded the settings
+are wiped on every boot, so nothing it pairs with is kept. Remove the keyboard from each
+computer's Bluetooth device list before pairing again.
 
 ### Debug logging over USB
 Flash `nicepillz_nice_nano_v2_usblog.uf2` (portrait) or `nicepillz_nice_nano_v2_landscape_usblog.uf2`

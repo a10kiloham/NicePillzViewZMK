@@ -21,7 +21,8 @@ Top right row, after F12: **F13 | F14 | F15 | F16 | Program**
 | Program + Caps Lock key | Caps Lock |
 | Program + left Shift | Leader key, then type a sequence |
 
-Flash mode without the keymap: double-tap the reset button on the board.
+Flash mode without the keymap: double-tap the reset button on the board. For Bluetooth trouble use
+Program + F8 first; the `_reset` firmware erases all settings and is only needed as a last resort.
 
 ## Other keys
 
