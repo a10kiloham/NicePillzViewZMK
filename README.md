@@ -68,7 +68,8 @@ Notes:
   is free and advertising.
 
 ### Label for the bottom of the keyboard
-`docs/bottom-label.txt` fits a 3 x 3 inch label. Print it in a monospace font at 8 pt.
+[`KEYS.md`](KEYS.md) is the one-page key reference to print. `docs/bottom-label.txt` is a
+condensed version that fits a 3 x 3 inch label in a monospace font at 8 pt.
 
 ```
 NICE PILLZ VIEW - QUICK REFERENCE
