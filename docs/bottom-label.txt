@@ -11,9 +11,11 @@ SYSTEM     hold Program +
   Caps key  Caps Lock
 
 LAYER  next layer, loops 1 to 5
+  1 Default 2 Lower 3 FN 4 System 5 BT
   Caps Lock key = F5, under X = Win
   L thumb: Ctrl Alt / Bksp Del
-  R thumb: Prog Ctrl / Enter Spc
+  R thumb: Func Ctrl / Enter Spc
+  Func held + key = FN, tap = Layer
 
 EDIT KEYS  https://zmk.studio
 github.com/a10kiloham/NicePillzViewZMK

@@ -26,12 +26,13 @@
 /********************/
 /*      Layers      */
 /********************/
-#define DEFAULT 0
-#define LOWER   1
-#define RAISE   2
-#define FN      3
-#define KEYPAD  4
-#define SYSTEM  5
+// The LAYER key (F16) and a tap of the FUNCTION thumb key step through these in order, dots 1-5
+// on the display.
+#define DEFAULT   0
+#define LOWER     1
+#define FN        2
+#define SYSTEM    3
+#define BLUETOOTH 4
 
 /********************/
 /* custom behaviors */
@@ -40,6 +41,14 @@
 ZMK_BEHAVIOR(f14_out, mod_morph,
     bindings = <&kp F14>, <&out OUT_TOG>;
     mods = <(MOD_LSFT|MOD_RSFT)>;
+)
+
+// FUNCTION thumb key: FN layer while held with another key, next layer when tapped on its own.
+// Used as &fn_key FN <next layer>. hold-preferred: any key pressed while it is down is an FN key.
+ZMK_BEHAVIOR(fn_key, hold_tap,
+    flavor = "hold-preferred";
+    tapping-term-ms = <200>;
+    bindings = <&mo>, <&to>;
 )
 
 /**********************/
@@ -77,12 +86,14 @@ ZMK_BEHAVIOR(f14_out, mod_morph,
     // |  F5   |  A   |  S   |  D   |  F   |  G   |                |  H   |  J   |  K   |  L   |  ;   |  '   |   (Caps Lock key = F5)
     // | LSHFT |  Z   |  X   |  C   |  V   |  B   |                |  N   |  M   |  ,   |  .   |  /   | RSHFT|
     //         |  `   | WIN  | LEFT |RIGHT |                              |  UP  | DOWN |  [   |  ]   |
-    //                                     | CTRL | ALT  |  | PROG | CTRL |
+    //                                     | CTRL | ALT  |  | FUNC | CTRL |
     //                                            | HOME |  | PGUP |
     //                              | BSPC | DEL  | END  |  | PGDN | ENT  | SPC  |
-    // BSPC, DEL and ENT are plain keys. PROGRAM (both keys) = SYSTEM when held.
-    // LAYER steps to the next layer in a loop: DEFAULT > LOWER > RAISE > FN > KEYPAD > DEFAULT.
-    // Bluetooth: PROGRAM + F1-F4 select the profile, PROGRAM + F8 forgets all four.
+    // BSPC, DEL and ENT are plain keys. PROGRAM (top right) = SYSTEM when held.
+    // LAYER (F16) steps to the next layer: DEFAULT > LOWER > FN > SYSTEM > BLUETOOTH > DEFAULT.
+    // FUNC (right thumb): FN layer while held with another key, same as LAYER when tapped alone.
+    // Bluetooth: PROGRAM + F1-F4 select the profile, PROGRAM + F8 forgets all four. The same keys
+    // work on the BLUETOOTH layer (dot 5).
 
 ZMK_LAYER(default_layer,
     &kp ESC     &kp F1       &kp F2      &kp F3        &kp F4            &kp F5   &kp F6  &kp F7  &kp F8                    &kp F9       &kp F10          &kp F11    &kp F12 &studio_unlock  &f14_out        &kp PSCRN       &to LOWER  &mo SYSTEM
@@ -91,83 +102,66 @@ ZMK_LAYER(default_layer,
     &kp F5      &kp A        &kp S       &kp D         &kp F             &kp G                      &kp H     &kp J          &kp K           &kp L       &kp SEMI        &kp SQT
     &kp LSHFT   &kp Z        &kp X       &kp C         &kp V             &kp B                      &kp N     &kp M          &kp COMMA       &kp DOT     &kp SLASH       &kp RSHFT
                 &kp GRAVE    &kp LGUI    &kp LEFT      &kp RIGHT                                              &kp UP         &kp DOWN        &kp LBKT    &kp RBKT
-                                                            &kp LCTRL       &kp LALT         &mo SYSTEM &kp RCTRL
+                                                            &kp LCTRL       &kp LALT         &fn_key FN LOWER  &kp RCTRL
                                                                             &kp HOME         &kp PG_UP
                                                 &kp BSPC    &kp DEL         &kp END          &kp PG_DN  &kp ENTER         &kp SPACE
 )
 
-// LOWER (LAYER key): Windows desktop shortcuts on the F row, editing and arrows on the left/right hands.
+// LOWER (dot 2): Windows desktop shortcuts on the F row, editing and arrows on the left/right hands.
     // F1 prev desktop, F2 next desktop, F3 task view, F4 new desktop, F8 input language,
     // F9 window to left monitor, F10 window to right monitor, F11 show desktop, F12 close desktop
 ZMK_LAYER(lower_layer,
-    &trans  &kp LG(LC(LEFT)) &kp LG(LC(RIGHT)) &kp LG(TAB) &kp LG(LC(D))    &trans  &trans  &trans  &kp LG(SPACE)     &kp LG(LS(LEFT))  &kp LG(LS(RIGHT))  &kp LG(D)  &kp LG(LC(F4))   &trans  &trans  &trans  &to RAISE  &trans
+    &trans  &kp LG(LC(LEFT)) &kp LG(LC(RIGHT)) &kp LG(TAB) &kp LG(LC(D))    &trans  &trans  &trans  &kp LG(SPACE)     &kp LG(LS(LEFT))  &kp LG(LS(RIGHT))  &kp LG(D)  &kp LG(LC(F4))   &trans  &trans  &trans  &to FN  &trans
     &trans  &trans      &trans      &trans      &trans      &trans                              &trans      &trans      &trans  &trans      &trans  &trans
     &trans  &trans      &trans      &trans      &trans      &kp DEL                             &trans      &trans      &trans  &trans      &trans  &trans
     &trans  &kp LC(A)   &kp LS(TAB) &kp LGUI    &kp TAB     &trans                              &kp LEFT    &kp DOWN    &kp UP  &kp RIGHT   &trans  &trans
     &trans  &kp LC(Z)   &kp LC(X)   &kp LC(C)   &kp LC(V)   &kp LC(B)                           &trans      &trans      &trans  &trans      &trans  &trans
             &trans      &trans      &trans      &trans                                                      &trans      &trans  &trans      &trans
-                                                            &trans  &trans              &trans  &trans
+                                                            &trans  &trans              &fn_key FN FN  &trans
                                                                     &trans              &trans
                                                     &trans  &trans  &trans              &trans  &trans  &trans
 )
 
-// RAISE (LAYER key): window management (Win+arrows snap/maximise/minimise), zoom, brackets.
-    // F1 snip (Win+Shift+S), F2 clipboard history (Win+V), F3 Explorer (Win+E), F4 settings (Win+I)
-ZMK_LAYER(raise_layer,
-    &trans  &kp LG(LS(S))  &kp LG(V)  &kp LG(E)  &kp LG(I)   &trans  &trans  &trans  &trans      &trans  &trans  &trans  &trans  &trans  &trans  &trans  &to FN  &trans
-    &kp LC(EQUAL)   &trans  &trans  &trans   &trans   &trans                                                                &trans      &trans          &trans      &trans          &trans  &kp LC(MINUS)
-    &trans          &trans  &trans  &kp LPAR &kp RPAR &trans                                                                &trans      &kp LG(M)       &trans      &trans          &trans  &trans
-    &trans          &trans  &trans  &kp LBKT &kp RBKT &trans                                                                &kp LG(LEFT) &kp LG(DOWN)    &kp LG(UP)  &kp LG(RIGHT)   &trans  &trans
-    &trans          &trans  &trans  &kp LBRC &kp RBRC &trans                                                                &trans      &trans          &trans      &trans          &trans  &trans
-                    &trans  &trans  &trans   &trans                                                                         &trans      &trans          &trans      &trans
-                                                  &trans  &trans        &trans  &trans
-                                                          &trans        &trans
-                                          &trans  &trans  &trans        &trans  &trans  &trans
-)
-
-// FN (LAYER key): media keys. F6 mute, F7 volume down, F8 volume up, F9 previous, F10 play/pause,
-// F11 next, F12 stop. The keys right of F12 stay the same as on every other layer.
+// FN (dot 3, or hold the FUNCTION thumb key): media keys. F6 mute, F7 volume down, F8 volume up,
+// F9 previous, F10 play/pause, F11 next, F12 stop. The keys right of F12 stay the same as on
+// every other layer.
 ZMK_LAYER(fn_layer,
-    &trans  &trans  &trans  &trans  &trans  &trans  &kp C_MUTE  &kp C_VOL_DN  &kp C_VOL_UP     &kp C_PREV  &kp C_PLAY_PAUSE  &kp C_NEXT  &kp C_STOP  &trans  &trans  &trans  &to KEYPAD  &trans
+    &trans  &trans  &trans  &trans  &trans  &trans  &kp C_MUTE  &kp C_VOL_DN  &kp C_VOL_UP     &kp C_PREV  &kp C_PLAY_PAUSE  &kp C_NEXT  &kp C_STOP  &trans  &trans  &trans  &to SYSTEM  &trans
     &trans  &trans  &trans  &trans  &trans  &trans                              &trans  &trans  &trans  &trans  &trans  &trans
     &trans  &trans  &trans  &trans  &trans  &trans                              &trans  &trans  &trans  &trans  &trans  &trans
     &trans  &trans  &trans  &trans  &trans  &trans                              &trans  &trans  &trans  &trans  &trans  &trans
     &trans  &trans  &trans  &trans  &trans  &trans                              &trans  &trans  &trans  &trans  &trans  &trans
             &trans  &trans  &trans  &trans                                              &trans  &trans  &trans  &trans
-                                                  &trans  &trans        &trans  &trans
+                                                  &trans  &trans        &fn_key FN SYSTEM  &trans
                                                           &trans        &trans
                                           &trans  &trans  &trans        &trans  &trans  &trans
 )
 
-// KEYPAD (LAYER key): Kinesis-style embedded numpad on the right hand.
-    // number row: 7 NumLk, 8 =, 9 /, 0 *, - -     U I O = 7 8 9, P = -     J K L = 4 5 6, ; = +
-    // M , . = 1 2 3, / = Enter     UP = 0, DOWN = .
-    // The 8 key is the main = key: Windows has no keypad = key and ignores that code.
-ZMK_LAYER(keypad_layer,
-    &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans     &trans  &trans  &trans  &trans  &trans  &trans  &trans  &to DEFAULT  &trans
-    &trans  &trans  &trans  &trans  &trans  &trans                              &trans      &kp KP_NUM  &kp EQUAL     &kp KP_SLASH  &kp KP_ASTERISK  &kp KP_MINUS
-    &trans  &trans  &trans  &trans  &trans  &trans                              &trans      &kp KP_N7   &kp KP_N8     &kp KP_N9     &kp KP_MINUS     &trans
-    &trans  &trans  &trans  &trans  &trans  &trans                              &trans      &kp KP_N4   &kp KP_N5     &kp KP_N6     &kp KP_PLUS      &trans
-    &trans  &trans  &trans  &trans  &trans  &trans                              &trans      &kp KP_N1   &kp KP_N2     &kp KP_N3     &kp KP_ENTER     &trans
-            &trans  &trans  &trans  &trans                                              &kp KP_N0   &kp KP_DOT    &trans        &trans
-                                                  &trans  &trans        &trans  &trans
-                                                          &trans        &trans
-                                          &trans  &trans  &trans        &trans  &kp KP_ENTER  &trans
-)
-
-// SYSTEM (hold PROGRAM): ESC or = -> bootloader (flashing mode), F1-F4 select Bluetooth profile
-// 1-4, F8 forgets all four Bluetooth pairings, Caps Lock key -> Caps Lock, left Shift -> leader key.
+// SYSTEM (dot 4, or hold PROGRAM): ESC or = -> bootloader (flashing mode), F1-F4 select Bluetooth
+// profile 1-4, F8 forgets all four Bluetooth pairings, Caps Lock key -> Caps Lock, left Shift ->
+// leader key.
 ZMK_LAYER(system_layer,
-    &bootloader  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &trans  &trans  &trans  &bt BT_CLR_ALL   &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
+    &bootloader  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &trans  &trans  &trans  &bt BT_CLR_ALL   &trans  &trans  &trans  &trans  &trans  &trans  &trans  &to BLUETOOTH  &trans
     &bootloader  &trans  &trans  &trans  &trans  &trans                                                                   &trans  &trans  &trans  &trans  &trans  &trans
     &trans  &trans  &trans  &trans  &trans  &trans                                                                   &trans  &trans  &trans  &trans  &trans  &trans
     &kp CAPS  &trans  &trans  &trans  &trans  &trans                                                                 &trans  &trans  &trans  &trans  &trans  &trans
     &leader   &trans  &trans  &trans  &trans  &trans                                                                 &trans  &trans  &trans  &trans  &trans  &trans
             &trans  &trans  &trans  &trans                                                                                   &trans  &trans  &trans  &trans
-                                                  &trans  &trans                                        &trans  &trans
+                                                  &trans  &trans                                        &fn_key FN BLUETOOTH  &trans
                                                           &trans                                        &trans
                                           &trans  &trans  &trans                                        &trans  &trans  &trans
 )
 
-// No tri-state (LOWER + RAISE = FN) rule: a conditional layer is switched off again whenever its
-// condition is not met, which would stop the LAYER key from selecting FN.
+// BLUETOOTH (dot 5): F1-F4 select Bluetooth profile 1-4, F8 forgets all four pairings. Everything
+// else types normally.
+ZMK_LAYER(bluetooth_layer,
+    &trans  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &trans  &trans  &trans  &bt BT_CLR_ALL   &trans  &trans  &trans  &trans  &trans  &trans  &trans  &to DEFAULT  &trans
+    &trans  &trans  &trans  &trans  &trans  &trans                                                                   &trans  &trans  &trans  &trans  &trans  &trans
+    &trans  &trans  &trans  &trans  &trans  &trans                                                                   &trans  &trans  &trans  &trans  &trans  &trans
+    &trans  &trans  &trans  &trans  &trans  &trans                                                                   &trans  &trans  &trans  &trans  &trans  &trans
+    &trans  &trans  &trans  &trans  &trans  &trans                                                                   &trans  &trans  &trans  &trans  &trans  &trans
+            &trans  &trans  &trans  &trans                                                                                   &trans  &trans  &trans  &trans
+                                                  &trans  &trans                                        &fn_key FN DEFAULT  &trans
+                                                          &trans                                        &trans
+                                          &trans  &trans  &trans                                        &trans  &trans  &trans
+)

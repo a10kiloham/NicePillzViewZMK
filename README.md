@@ -33,8 +33,9 @@ The keymap follows the Kinesis Advantage legends and targets Windows.
 | F13 (the Print Screen key) | Unlock ZMK Studio |
 | F14 (the Scroll Lock key) | F14; with Shift: output between Bluetooth and USB |
 | Pause key, right of F14 | Print Screen |
-| Keypad key | Layer: steps to the next layer in a loop |
-| Program (top right and right thumb) | SYSTEM layer while held |
+| Keypad key (F16) | Layer: steps to the next layer in a loop |
+| Function key (right thumb, left of Right Ctrl) | FN layer while held with another key; tapped alone, same as the Layer key |
+| Program (top right) | SYSTEM layer while held |
 | Program + F1, F2, F3, F4 | Select Bluetooth profile 1 to 4 |
 | Program + F8 | Forget all four Bluetooth pairings |
 | Program + Esc or = | Bootloader, for flashing |
@@ -43,7 +44,7 @@ The keymap follows the Kinesis Advantage legends and targets Windows.
 | Caps Lock key, left side | F5 |
 | Key beneath X | Win (GUI) |
 | Left thumb, top | Left Ctrl, Alt |
-| Right thumb, top | Program, Right Ctrl |
+| Right thumb, top | Function, Right Ctrl |
 | Left thumb, bottom | Backspace, Delete |
 | Right thumb, bottom | Enter, Space |
 
@@ -51,8 +52,8 @@ Notes:
 
 - F13 and F14 are the Print Screen and Scroll Lock positions. Scroll Lock and Pause are not on
   the base layer.
-- The Layer key loops through DEFAULT, LOWER, RAISE, FN and KEYPAD, which are dots 1 to 5 on the
-  display. SYSTEM is left out of the loop, because it is only meant to be held.
+- The Layer key loops through DEFAULT, LOWER, FN, SYSTEM and BLUETOOTH, which are dots 1 to 5 on
+  the display. A tap of the Function thumb key does the same.
 - F13, F14, Print Screen, Layer and Program do the same thing on every layer.
 - Pairing: hold Program and tap F1 to F4 to pick a profile; a free profile advertises straight
   away, so pair from the PC. Program + F8 forgets all four pairings at once; remove `NicePillz`
@@ -62,7 +63,8 @@ Notes:
 - ZMK cannot switch the Bluetooth radio off. Shift + F14 switches the output between Bluetooth
   and USB instead; with USB selected and no cable, the keyboard sends nothing. The display shows
   a USB symbol while USB is selected.
-- LOWER, RAISE and the media-key FN layer are reached with the Layer key.
+- The media keys on FN are quickest with the Function thumb key held: Function + F10 is
+  play/pause.
 - The display shows the Bluetooth logo on the left with the profile number beside it at the same
   size. A small tick means connected, a cross means not connected, and no mark means the profile
   is free and advertising.
@@ -85,9 +87,11 @@ SYSTEM     hold Program +
   Caps key  Caps Lock
 
 LAYER  next layer, loops 1 to 5
+  1 Default 2 Lower 3 FN 4 System 5 BT
   Caps Lock key = F5, under X = Win
   L thumb: Ctrl Alt / Bksp Del
-  R thumb: Prog Ctrl / Enter Spc
+  R thumb: Func Ctrl / Enter Spc
+  Func held + key = FN, tap = Layer
 
 EDIT KEYS  https://zmk.studio
 github.com/a10kiloham/NicePillzViewZMK
@@ -99,24 +103,20 @@ github.com/a10kiloham/NicePillzViewZMK
 - Caps Lock position is **F5**. Left Shift is Left Shift and right Shift is Right Shift, both plain keys.
 - The letter rows are plain keys, no home-row mods. The key beneath X, left of the Left arrow, is
   **Win**.
-- Thumbs: Ctrl, Alt | Program, Ctrl on top; Backspace, Delete | Enter, Space on the big keys, all
-  plain keys.
+- Thumbs: Ctrl, Alt | Function, Ctrl on top; Backspace, Delete | Enter, Space on the big keys.
+  **Function** held with another key = that key on the FN layer; tapped alone = the Layer key.
 - Top right keys after F12: **Studio unlock** (F13), **F14** (Shift + F14 = Bluetooth/USB
-  output), **Print Screen**, **Layer**, **Program**, the same on every layer. Layer steps to the next layer in a loop:
-  DEFAULT, LOWER, RAISE, FN, KEYPAD.
-- KEYPAD is the numpad layer
-  (7 8 9 on U I O, 4 5 6 on J K L, 1 2 3 on M , ., 0 and . on Up/Down, Enter on / and the right
-  thumb Enter, Num Lock on 7). The digits follow the Num Lock state, as on any numpad.
-  **Program** held = SYSTEM, on both the top right key and the right thumb key.
+  output), **Print Screen**, **Layer**, **Program**, the same on every layer. Layer steps to the
+  next layer in a loop: DEFAULT, LOWER, FN, SYSTEM, BLUETOOTH. **Program** held = SYSTEM.
 - LOWER: F1/F2 previous/next virtual desktop, F3 task view, F4 new desktop, F8 input language,
   F9/F10 move window to the left/right monitor, F11 show desktop, F12 close desktop; arrows on
   H J K L; Ctrl+A/Z/X/C/V on the left hand.
-- RAISE: Win+Left/Down/Up/Right on H J K L (snap, restore, maximise, snap), Win+M on U,
-  Ctrl+= / Ctrl+- zoom on the number row, ( ) [ ] { } on E R.
 - FN: F6 mute, F7 volume down, F8 volume up, F9 previous, F10 play/pause, F11 next, F12 stop.
 - SYSTEM (hold Program): **ESC or = = bootloader** (flashing mode), **F1-F4 select Bluetooth
   profiles 1-4**, **F8 forgets all four Bluetooth pairings**, the Caps Lock key is **Caps Lock**,
   left Shift is the **leader** key.
+- BLUETOOTH (dot 5): the same F1-F4 and F8 keys without holding Program; everything else types
+  normally.
 
 ### ZMK Studio
 Open [zmk.studio](https://zmk.studio) in Chrome or Edge (Web Serial; Firefox does not work) or the
