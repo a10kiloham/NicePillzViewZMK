@@ -21,8 +21,13 @@ Top right row, after F12: **F13 | F14 | F15 | F16 | Program**
 | Program + Caps Lock key | Caps Lock |
 | Program + left Shift | Leader key, then type a sequence |
 
-Flash mode without the keymap: double-tap the reset button on the board. For Bluetooth trouble use
-Program + F8 first; the `_reset` firmware erases all settings and is only needed as a last resort.
+Flash mode without the keymap: double-tap the reset button, the small push button on the Nice
+Pillz PCB next to the nice!nano (the nice!nano's own tiny button does the same). The NICENANO drive
+appears.
+
+For Bluetooth trouble use Program + F8 first. As a last resort, `firmware/nicepillz_nice_nano_v2_reset.uf2`
+(or `_landscape_reset.uf2`) erases all settings on every boot; flash it, let it boot once, then
+flash the normal firmware again. Both are also on the GitHub release page.
 
 ## Other keys
 
