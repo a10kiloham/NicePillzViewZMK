@@ -128,35 +128,38 @@ static void draw_wpm(lv_obj_t *c, const struct npv_state *st, lv_coord_t gx, lv_
     d.width = 1;
     lv_canvas_draw_line(c, pts, NPV_WPM_POINTS, &d);
 
-    /* current value in the top-left corner of the frame, on a clear patch */
+    /* current value over the top-left quadrant of the frame, cleared so the digits stay legible */
     char buf[8];
     snprintf(buf, sizeof(buf), "%u", st->wpm);
-    lv_point_t sz;
-    lv_txt_get_size(&sz, buf, &lv_font_montserrat_10, 0, 0, LV_COORD_MAX, 0);
-    rect(c, gx + 2, gy + 2, sz.x + 3, 10, 0, true, 0, bg);
-    text(c, &lv_font_montserrat_10, gx + 3, gy + 1, 24, LV_TEXT_ALIGN_LEFT, fg, buf);
+    rect(c, gx + 1, gy + 1, gw / 2 - 1, gh / 2 - 1, 0, true, 0, bg);
+    text(c, &lv_font_montserrat_12, gx + 3, gy + 1, gw / 2 - 4, LV_TEXT_ALIGN_LEFT, fg, buf);
 }
 
-/* Output block, 22 + 20 + 16 px wide from x + pad; a USB symbol is centred in (x, w). */
+/* Output block centred in (x, w): a USB symbol, or the Bluetooth logo, the active profile as a
+ * numeral of the same size and a small connection mark (tick = connected, cross = not connected,
+ * nothing = profile is free and advertising), packed with 2 px gaps. */
 static void draw_output(lv_obj_t *c, const struct npv_state *st, lv_coord_t x, lv_coord_t y,
-                        lv_coord_t w, lv_coord_t pad) {
+                        lv_coord_t w) {
     if (st->transport == NPV_TRANSPORT_USB) {
         text(c, &lv_font_montserrat_22, x, y, w, LV_TEXT_ALIGN_CENTER, fg, LV_SYMBOL_USB);
         return;
     }
 
-    /* bluetooth logo shifted left, the active profile as a numeral of the same size next to
-     * it, and a small connection mark in the corner: tick = connected, cross = not connected,
-     * nothing = profile is free and advertising */
-    lv_coord_t lx = x + pad;
-    text(c, &lv_font_montserrat_22, lx, y, 22, LV_TEXT_ALIGN_CENTER, fg, LV_SYMBOL_BLUETOOTH);
-
     char num[4];
     snprintf(num, sizeof(num), "%u", st->ble_profile + 1);
-    text(c, &lv_font_montserrat_22, lx + 22, y, 20, LV_TEXT_ALIGN_CENTER, fg, num);
-
     const char *status = st->ble_connected ? LV_SYMBOL_OK : (st->ble_open ? "" : LV_SYMBOL_CLOSE);
-    text(c, &lv_font_montserrat_10, lx + 42, y + 8, 16, LV_TEXT_ALIGN_CENTER, fg, status);
+
+    const lv_coord_t gap = 2;
+    lv_coord_t wl = lv_txt_get_width(LV_SYMBOL_BLUETOOTH, strlen(LV_SYMBOL_BLUETOOTH),
+                                     &lv_font_montserrat_22, 0, 0);
+    lv_coord_t wn = lv_txt_get_width(num, strlen(num), &lv_font_montserrat_22, 0, 0);
+    lv_coord_t wm = lv_txt_get_width(LV_SYMBOL_OK, strlen(LV_SYMBOL_OK), &lv_font_montserrat_10, 0, 0);
+    lv_coord_t lx = x + (w - (wl + gap + wn + gap + wm)) / 2;
+
+    text(c, &lv_font_montserrat_22, lx, y, wl, LV_TEXT_ALIGN_LEFT, fg, LV_SYMBOL_BLUETOOTH);
+    text(c, &lv_font_montserrat_22, lx + wl + gap, y, wn, LV_TEXT_ALIGN_LEFT, fg, num);
+    text(c, &lv_font_montserrat_10, lx + wl + gap + wn + gap, y + 8, wm, LV_TEXT_ALIGN_LEFT, fg,
+         status);
 }
 
 static void draw_layer_dots(lv_obj_t *c, const struct npv_state *st, lv_coord_t x0,
@@ -266,7 +269,7 @@ void npv_draw(lv_obj_t *c, const struct npv_state *st) {
     hline(c, SEP2_Y, 6, NPV_W - 7);
     draw_wpm(c, st, GRAPH_X, GRAPH_Y, GRAPH_W, GRAPH_H);
     hline(c, SEP3_Y, 6, NPV_W - 7);
-    draw_output(c, st, 0, BT_Y, NPV_W, 6);
+    draw_output(c, st, 0, BT_Y, NPV_W);
     draw_layer_dots(c, st, DOT_X0, DOTS_Y);
     draw_locks(c, st, LOCK_BOX_X, LOCKS_Y, LOCK_BOX_W, LOCKS_H);
     draw_mods(c, st, 1, MODS1_Y, NPV_W - 2, MODS_H, &lv_font_montserrat_8, 0, 3);
@@ -284,10 +287,10 @@ void npv_draw(lv_obj_t *c, const struct npv_state *st) {
  */
 #define L_SEP_Y 38
 #define L_BAT_W 50
-#define L_GRAPH_X 52
-#define L_GRAPH_W 46
+#define L_GRAPH_X 50
+#define L_GRAPH_W 60
 #define L_GRAPH_H 31
-#define L_OUT_X 101
+#define L_OUT_X 111
 #define L_DOTS_Y 40
 #define L_LOCK_X 72
 #define L_LOCK_Y 41
@@ -304,7 +307,7 @@ void npv_draw_landscape(lv_obj_t *c, const struct npv_state *st) {
 
     draw_battery(c, st, 0, -2, L_BAT_W, 2, true);
     draw_wpm(c, st, L_GRAPH_X, 3, L_GRAPH_W, L_GRAPH_H);
-    draw_output(c, st, L_OUT_X, 6, NPV_PANEL_W - L_OUT_X, 0);
+    draw_output(c, st, L_OUT_X, 6, NPV_PANEL_W - L_OUT_X);
     hline(c, L_SEP_Y, 4, NPV_PANEL_W - 5);
     draw_layer_dots(c, st, DOT_X0, L_DOTS_Y);
     draw_locks(c, st, L_LOCK_X, L_LOCK_Y, L_LOCK_W, L_LOCK_H);

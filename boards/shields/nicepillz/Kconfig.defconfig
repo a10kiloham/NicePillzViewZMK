@@ -61,7 +61,6 @@ config NICEPILLZ_STATUS_SCREEN
     select LV_FONT_MONTSERRAT_10
     select LV_FONT_MONTSERRAT_12
     select LV_FONT_MONTSERRAT_22
-    select ZMK_WPM
 
 if NICEPILLZ_STATUS_SCREEN
 
@@ -78,8 +77,12 @@ config NICEPILLZ_PROGRAM_LAYER
     int "Layer that the Program key holds, shown as Prgm on the display"
     default 3
 
+config NICEPILLZ_WPM_WINDOW_S
+    int "Seconds of typing the words per minute figure averages over"
+    default 10
+
 config NICEPILLZ_WPM_INTERVAL_MS
-    int "Minimum time between WPM updates on the display (ms)"
+    int "Time between samples in the WPM history graph (ms)"
     default 5000
 
 endif # NICEPILLZ_STATUS_SCREEN

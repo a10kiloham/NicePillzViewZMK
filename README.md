@@ -146,8 +146,9 @@ rotated into the panel, top to bottom:
 
 1. **Battery** - a battery-shaped gauge plus the percentage. On USB power the gauge is replaced by
    a lightning bolt and the word *Charging*.
-2. **Words per minute** - a graph of the last 24 samples (one every 5 s, so two minutes of
-   history, auto-scaled) with the current value in the corner (`CONFIG_NICEPILLZ_WPM_INTERVAL_MS`).
+2. **Words per minute** - the average over the last 10 seconds of typing
+   (`CONFIG_NICEPILLZ_WPM_WINDOW_S`) in the corner, over a graph of the last 24 samples (one every
+   5 s, `CONFIG_NICEPILLZ_WPM_INTERVAL_MS`, so two minutes of history, auto-scaled).
 3. **Output** - a Bluetooth logo on the left with the active profile number beside it at the
    same size, then a small tick (connected) or cross (bonded but not connected); a USB symbol
    when USB is the selected output.

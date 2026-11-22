@@ -4,7 +4,7 @@
  * Portrait layout, header pins at the bottom:
  *
  *      [=====]  87%     battery gauge + percent, or "Charging" when on USB
- *      [ 63 /\/\_ ]    words per minute: history graph, one sample per 5 s
+ *      [ 63 /\/\_ ]    words per minute over the last 10 s: history graph, one sample per 5 s
  *      (BT) 1 ok        output: bluetooth logo + profile numeral, or a USB symbol
  *   (1)(2)(3)(4)(5)     active layer
  *     [Caps Lock]       HID lock indicators
@@ -43,7 +43,6 @@
 #include <zmk/endpoints.h>
 #include <zmk/keymap.h>
 #include <zmk/hid_indicators.h>
-#include <zmk/wpm.h>
 
 #include "view_draw.h"
 
@@ -62,6 +61,22 @@ static lv_obj_t *panel_canvas;
 static struct npv_state state;
 static K_MUTEX_DEFINE(state_lock);
 static int64_t last_wpm_update;
+
+/* Words per minute: key presses are counted into one-second buckets, and the value shown is the
+ * average over the last CONFIG_NICEPILLZ_WPM_WINDOW_S seconds, five characters per word. */
+static atomic_t key_presses;
+static uint16_t wpm_buckets[CONFIG_NICEPILLZ_WPM_WINDOW_S];
+static int wpm_bucket;
+
+static int wpm_tick(void) {
+    wpm_buckets[wpm_bucket] = (uint16_t)atomic_set(&key_presses, 0);
+    wpm_bucket = (wpm_bucket + 1) % CONFIG_NICEPILLZ_WPM_WINDOW_S;
+    int presses = 0;
+    for (int i = 0; i < CONFIG_NICEPILLZ_WPM_WINDOW_S; i++) {
+        presses += wpm_buckets[i];
+    }
+    return presses * 60 / 5 / CONFIG_NICEPILLZ_WPM_WINDOW_S;
+}
 
 /* Modifier keys currently down, one bit per HID usage Left Ctrl (0xE0) .. Right GUI (0xE7).
  * ZMK never raises zmk_modifiers_state_changed, so this is tracked from the keycode events. */
@@ -134,6 +149,9 @@ static int zmk_event_listener(const zmk_event_t *eh) {
     if (kc) {
         if (kc->usage_page != HID_USAGE_KEY || kc->keycode < HID_USAGE_KEY_KEYBOARD_LEFTCONTROL ||
             kc->keycode > HID_USAGE_KEY_KEYBOARD_RIGHT_GUI) {
+            if (kc->state && kc->usage_page == HID_USAGE_KEY) {
+                atomic_inc(&key_presses); /* counts towards the words per minute */
+            }
             return ZMK_EV_EVENT_BUBBLE; /* not a modifier key, nothing to show */
         }
         WRITE_BIT(held_mod_keys, kc->keycode - HID_USAGE_KEY_KEYBOARD_LEFTCONTROL, kc->state);
@@ -155,23 +173,26 @@ ZMK_SUBSCRIPTION(npv_listener, zmk_layer_state_changed);
 ZMK_SUBSCRIPTION(npv_listener, zmk_hid_indicators_changed);
 ZMK_SUBSCRIPTION(npv_listener, zmk_keycode_state_changed);
 
-/* Once a second on the display queue: every CONFIG_NICEPILLZ_WPM_INTERVAL_MS push the current
- * WPM into the history and redraw the graph. */
+/* Once a second on the display queue: update the words per minute, and every
+ * CONFIG_NICEPILLZ_WPM_INTERVAL_MS push it into the history. Redraw when something changed. */
 static void tick_handler(struct k_work *work) {
+    int wpm = wpm_tick();
     int64_t now = k_uptime_get();
-    if ((now - last_wpm_update) < CONFIG_NICEPILLZ_WPM_INTERVAL_MS) {
-        return;
-    }
-    last_wpm_update = now;
+    bool sample = (now - last_wpm_update) >= CONFIG_NICEPILLZ_WPM_INTERVAL_MS;
 
     k_mutex_lock(&state_lock, K_FOREVER);
-    int wpm = zmk_wpm_get_state();
+    bool changed = (state.wpm != wpm) || sample;
     state.wpm = wpm;
-    memmove(&state.wpm_hist[0], &state.wpm_hist[1], NPV_WPM_POINTS - 1);
-    state.wpm_hist[NPV_WPM_POINTS - 1] = wpm > 255 ? 255 : wpm;
+    if (sample) {
+        last_wpm_update = now;
+        memmove(&state.wpm_hist[0], &state.wpm_hist[1], NPV_WPM_POINTS - 1);
+        state.wpm_hist[NPV_WPM_POINTS - 1] = wpm > 255 ? 255 : wpm;
+    }
     k_mutex_unlock(&state_lock);
 
-    redraw_handler(NULL);
+    if (changed) {
+        redraw_handler(NULL);
+    }
 }
 
 K_WORK_DEFINE(tick_work, tick_handler);
@@ -198,7 +219,7 @@ lv_obj_t *zmk_display_status_screen(void) {
 
     k_mutex_lock(&state_lock, K_FOREVER);
     capture_zmk_state(&state);
-    state.wpm = zmk_wpm_get_state();
+    state.wpm = 0;
     k_mutex_unlock(&state_lock);
     last_wpm_update = k_uptime_get();
 
